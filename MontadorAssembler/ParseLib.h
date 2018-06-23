@@ -53,7 +53,6 @@ public:
 	void setSectionText(bool sectionText);
 
 	bool isSectionData() const;
-
 	void setSectionData(bool sectionData);
 
 	int converteOperandoParaInteiro(std::string operando);

@@ -37,10 +37,10 @@ enum diretivas {
 	SECTION,
 	SPACE,
 	CONST,
-	EQU,
-	IF,
-	MACRO,
-	ENDMACRO,
+	BEGIN,
+	END,
+	PUBLIC,
+	EXTERN
 };
 
 struct InfoDeInstrucoes {
@@ -56,6 +56,15 @@ struct InfoDeDiretivas {
 	bool isPre;
 };
 
+struct InfoDeDefinicao {
+	int valor;
+	InfoDeDefinicao(int valor);
+};
+
+struct InfoDeUso {
+	std::vector<int> enderecoList;
+};
+
 struct InfoDeSimbolo {
 	int endereco; // -1 significa endereço indefinido
 	int espaco; // -1 significa espaço indefinido
@@ -63,7 +72,8 @@ struct InfoDeSimbolo {
 	bool isConstante; // false funcionará para
 	int valorConstante; // Talvez não seja necessário, já que o .o não faz cálculos com o valor absoluto da constante
 						// -1 significa valor indefinido
-	InfoDeSimbolo(int endereco, int espaco, bool isConstante, int valorConstante);
+	bool isExtern;
+	InfoDeSimbolo(int endereco, int espaco, bool isConstante, int valorConstante, bool isExtern);
 };
 struct InfoMacroDef {
 	int linha;
@@ -89,22 +99,21 @@ public:
 	//Tabela de símbolos
 	void insereSimboloNaTabelaDeSimbolos(std::string, InfoDeSimbolo);
 	InfoDeSimbolo obtemSimboloNaTabelaDeSimbolos(std::string id);
+	void modificaSimboloNaTabelaDeSimbolos(std::string id, InfoDeSimbolo infoSimbolo);
 	bool rotuloJaExistenteNaTabelaDeSimbolos(std::string);
 
-	//Def table
-	void insereMacroNaTabelaDeDefinicoes(std::string nomeMacro, InfoMacroDef infoMacroDef);
-	InfoMacroDef obtemInfoMacroDefNaTabelaDeDefinicoes(std::string id);
+	//Tabela de definições
+	void insereSimboloNaTabelaDeDefinicoes(std::string, InfoDeDefinicao);
 
-	//Name table
-	void insereNomeDaMacroNaTabelaDeNomes(std::string nomeMacro, InfoMacroName infoMacroName);
-	InfoMacroName obtemInfoMacroNameNaTabelaDeNomes(std::string id);
-	bool macroJaExistenteNaTabelaDeNomes(std::string id);
+
+	//Tabela de uso
+
 
 	const std::map<std::string, InfoDeSimbolo> &getTabelaDeSimbolos() const;
 
 	void setTabelaDeSimbolos(const std::map<std::string, InfoDeSimbolo> &TabelaDeSimbolos);
 
-	void esvaziarTabelaDeSimbolosEDeMacros();
+	void esvaziarTabelaDeSimbolos();
 
 
 private:
@@ -112,6 +121,6 @@ private:
 	static std::map<std::string, InfoDeInstrucoes> TabelaDeInstrucoes;
 	static std::map<std::string, InfoDeDiretivas> TabelaDeDiretivas;
 	static std::map<std::string, InfoDeSimbolo> TabelaDeSimbolos;
-	static std::map<std::string, InfoMacroDef> MacroDefinitionTable;
-	static std::map<std::string, InfoMacroName> MacroNameTable;
+	std::map<std::string, InfoDeDefinicao> TabelaDeDefinicoes;
+	std::map<std::string, InfoDeUso> TabelaDeUso;
 };

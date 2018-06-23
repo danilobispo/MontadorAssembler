@@ -29,7 +29,7 @@ public:
 
 	// TODO: Se der tempo, mover isso para montador
 	void montarCodigo();
-	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha);
+	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos);
 	void showTabelaDeSimbolos();
 	void showCodigo();
 	void segundaPassagem();
@@ -43,9 +43,7 @@ public:
 	int converteStringParaInt(std::string operando);
 	int converteStringHexaParaInt(std::string operando);
 
-	void segundaPassagem(std::string nomeArquivoSaida);
-
-	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, std::string nomeArquivoSaida);
+	void processarDiretivas(int numeroDeArquivos);
 
 	void montarCodigo(std::string nomeArquivoSaida);
 };
