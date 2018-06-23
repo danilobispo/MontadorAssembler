@@ -204,7 +204,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				// space os valores serão resolvidos corretamente.
 				// No caso do rótulo já ter sido definido, apenas 
 				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[0])) {
-					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(label);
+					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[0]);
 					infoCopy.isExtern = false;
 					tabelaLib.modificaSimboloNaTabelaDeSimbolos(operando[0], infoCopy);
 				} else {
@@ -214,12 +214,12 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			else if (operacao == "extern") {
 				// Quando a diretiva EXTERN é encontrada, insere o respectivo rótulo na TS com
 				// valor “zero absoluto” e a indicacao de símbolo externo;
-				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(label)) {
-					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(label);
+				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[0])) {
+					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[0]);
 					infoCopy.isExtern = true;
-					tabelaLib.modificaSimboloNaTabelaDeSimbolos(label, infoCopy);
+					tabelaLib.modificaSimboloNaTabelaDeSimbolos(operando[0], infoCopy);
 				}
-				tabelaLib.insereSimboloNaTabelaDeSimbolos(label, InfoDeSimbolo(-2, -2, false, 0, true));
+				tabelaLib.insereSimboloNaTabelaDeSimbolos(operando[0], InfoDeSimbolo(-2, -2, false, 0, true));
 			}
 		}
 		else {
@@ -227,9 +227,10 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 		}
 		contadorLinha++;
 	}
-
+	tabelaLib.montarTabelaDeDefinicoes();
 	//    std::cout << "Fim da primeira passagem!" << std::endl;
 	showTabelaDeSimbolos();
+	showTabelaDeDefinicoes();
 	segundaPassagem();
 }
 
@@ -255,11 +256,25 @@ int PreProcessamento::converteStringHexaParaInt(std::string operando) {
 void PreProcessamento::showTabelaDeSimbolos() {
 	TabelaLib tabelaLib;
 	std::map<std::string, InfoDeSimbolo> tabelaDeSimbolos = tabelaLib.getTabelaDeSimbolos();
+	std::string isExterno;
+	std::cout << "Tabela de Símbolos: " << std::endl;
 	for (auto &tabelaDeSimbolo : tabelaDeSimbolos) {
+		isExterno = tabelaDeSimbolo.second.isExtern ? "true" : "false";
 		        std::cout << "Simbolo: " << tabelaDeSimbolo.first << std::endl;
 		        std::cout << "Valor: " << tabelaDeSimbolo.second.endereco << std::endl;
+				std::cout << "Externo? : " << isExterno << std::endl;
 	}
+}
 
+void PreProcessamento::showTabelaDeDefinicoes() {
+	TabelaLib tabelaLib;
+	std::map<std::string, InfoDeDefinicao> tabelaDeDefinicoes = tabelaLib.getTabelaDeDefinicoes();
+	std::string isExterno;
+	std::cout << "Tabela de Definições: " << std::endl;
+	for (auto &tabelaDeDefinicao : tabelaDeDefinicoes) {
+		std::cout << "Simbolo: " << tabelaDeDefinicao.first << std::endl;
+		std::cout << "Valor: " << tabelaDeDefinicao.second.valor << std::endl;
+	}
 }
 
 

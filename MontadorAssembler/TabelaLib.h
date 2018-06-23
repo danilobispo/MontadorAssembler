@@ -104,11 +104,11 @@ public:
 
 	//Tabela de definições
 	void insereSimboloNaTabelaDeDefinicoes(std::string, InfoDeDefinicao);
+	void montarTabelaDeDefinicoes();
 
+	const std::map<std::string, InfoDeDefinicao>& getTabelaDeDefinicoes() const;
 
 	//Tabela de uso
-
-
 	const std::map<std::string, InfoDeSimbolo> &getTabelaDeSimbolos() const;
 
 	void setTabelaDeSimbolos(const std::map<std::string, InfoDeSimbolo> &TabelaDeSimbolos);
@@ -121,6 +121,6 @@ private:
 	static std::map<std::string, InfoDeInstrucoes> TabelaDeInstrucoes;
 	static std::map<std::string, InfoDeDiretivas> TabelaDeDiretivas;
 	static std::map<std::string, InfoDeSimbolo> TabelaDeSimbolos;
-	std::map<std::string, InfoDeDefinicao> TabelaDeDefinicoes;
-	std::map<std::string, InfoDeUso> TabelaDeUso;
+	static std::map<std::string, InfoDeDefinicao> TabelaDeDefinicoes;
+	static std::map<std::string, InfoDeUso> TabelaDeUso;
 };

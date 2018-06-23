@@ -35,8 +35,8 @@ std::map<std::string, InfoDeDiretivas> TabelaLib::TabelaDeDiretivas{
 };
 
 std::map<std::string, InfoDeSimbolo> TabelaLib::TabelaDeSimbolos;
-//std::map<std::string, InfoDeDefinicao> TabelaLib::TabelaDeDefinicoes;
-//std::map<std::string, InfoDeUso> TabelaLib::TabelaDeUso;
+std::map<std::string, InfoDeDefinicao> TabelaLib::TabelaDeDefinicoes;
+std::map<std::string, InfoDeUso> TabelaLib::TabelaDeUso;
 
 
 bool TabelaLib::isDiretiva(std::string operacao) {
@@ -86,6 +86,25 @@ void TabelaLib::modificaSimboloNaTabelaDeSimbolos(std::string key, InfoDeSimbolo
 
 bool TabelaLib::rotuloJaExistenteNaTabelaDeSimbolos(std::string rotulo) {
 	return !(TabelaLib::TabelaDeSimbolos.find(rotulo) == TabelaLib::TabelaDeSimbolos.end());
+}
+
+void TabelaLib::insereSimboloNaTabelaDeDefinicoes(std::string key, InfoDeDefinicao infoDeDefinicao)
+{
+	TabelaLib::TabelaDeDefinicoes.insert(std::make_pair(key, infoDeDefinicao));
+}
+
+void TabelaLib::montarTabelaDeDefinicoes()
+{
+	std::map<std::string, InfoDeSimbolo> tabelaCopy = getTabelaDeSimbolos();
+	for (auto &tabelaDeSimbolo : tabelaCopy) {
+		if (!tabelaDeSimbolo.second.isExtern) { // Se a variável não for EXTERN, ela será adicionada à TD
+			insereSimboloNaTabelaDeDefinicoes(tabelaDeSimbolo.first, InfoDeDefinicao(tabelaDeSimbolo.second.endereco));
+		}
+	}
+}
+
+const std::map<std::string, InfoDeDefinicao> &TabelaLib::getTabelaDeDefinicoes() const {
+	return TabelaDeDefinicoes;
 }
 
 const std::map<std::string, InfoDeSimbolo> &TabelaLib::getTabelaDeSimbolos() const {
