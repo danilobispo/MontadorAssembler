@@ -123,6 +123,8 @@ public:
 
 	void esvaziarTabelaDeSimbolos();
 
+	void esvaziarTabelas();
+
 
 private:
 	// Todas são statics pois usarei em várias partes do código e são de instância única durante a execução

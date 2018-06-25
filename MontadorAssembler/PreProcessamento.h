@@ -30,11 +30,16 @@ public:
 	// TODO: Se der tempo, mover isso para montador
 	void montarCodigo();
 	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos);
+	void segundaPassagem(std::string nomeArquivoSaida);
 	void showTabelaDeSimbolos();
 	void showTabelaDeDefinicoes();
+	void escreveTabelaDeDefinicoesNoArquivoDeSaida(std::string nomeDoArquivo);
+	void escreveTabelaDeUsoNoArquivoDeSaida(std::string nomeDoArquivo);
+	void escreveMapaDeBitsNoArquivoDeSaida(std::string nomeDoArquivo, std::vector<int> mapaDeBits);
+	void escreveTamanhoDoCodigoNoArquivoDeSaida(std::string nomeDoArquivo, int tamanho);
 	void showTabelaDeUso();
+	void showMapaDeBits(std::vector<int>);
 	void showCodigo();
-	void segundaPassagem();
 	void gerarCodigoObjeto();
 	void analiseLexica();
 	void analiseSintatica();

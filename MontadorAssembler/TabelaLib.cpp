@@ -25,13 +25,13 @@ std::map <std::string, InfoDeInstrucoes> TabelaLib::TabelaDeInstrucoes{
 };
 
 std::map<std::string, InfoDeDiretivas> TabelaLib::TabelaDeDiretivas{
-{ "section",{ 1,1, SECTION, bool(false) } },
+{ "section",{ 1,0, SECTION, bool(false) } },
 { "space",{ -1,-1, SPACE, bool(false) } },
 { "const" ,{ 1,1, CONST, bool(false) } },
 { "begin",{ 0,0, BEGIN, bool(false) } },
 { "end",{ 0,0, END, bool(false) } },
 { "public",{ 1,0, PUBLIC, bool(false)} },
-{ "extern", {1,0, EXTERN, bool(false)} }
+{ "extern", {0,0, EXTERN, bool(false)} }
 };
 
 std::map<std::string, InfoDeSimbolo> TabelaLib::TabelaDeSimbolos;
@@ -160,6 +160,13 @@ InfoDeSimbolo TabelaLib::obtemSimboloNaTabelaDeSimbolos(std::string id) {
 
 void TabelaLib::esvaziarTabelaDeSimbolos() {
 	TabelaLib::TabelaDeSimbolos.clear();
+}
+
+void TabelaLib::esvaziarTabelas() {
+	TabelaLib::TabelaDeSimbolos.clear();
+	TabelaLib::TabelaDeDefinicoes.clear();
+	TabelaLib::TabelaDeUso.clear();
+
 }
 
 InfoDeUso::InfoDeUso(int valor)

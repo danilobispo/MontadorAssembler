@@ -48,11 +48,11 @@ std::string ParseLib::parseOperacao(std::string linha, bool hasLabel) {
 		std::back_inserter(tokensLinhas));
 
 	if (hasLabel) {
-		//        std::cout << "Linha Operacao/Diretiva:" << tokensLinhas[1] << std::endl;
+		//std::cout << "Linha Operacao/Diretiva:" << tokensLinhas[1] << std::endl;
 		return tokensLinhas[1];
 	}
 	else {
-		//        std::cout << "Linha Operacao/Diretiva:" << tokensLinhas[0] << std::endl;
+		//std::cout << "Linha Operacao/Diretiva:" << tokensLinhas[0] << std::endl;
 		return tokensLinhas[0];
 	}
 }
@@ -186,9 +186,10 @@ std::string ParseLib::removeComentarios(std::string linha) {
 	// separaremos a linha pelo delimitador ;
 	// Verificamos antes se a linha possui comentários, e então fazemos a remoção de string
 	std::string::size_type posicaoComentario = linha.find(';');
+	std::string::size_type posicaoPuloDeLinha = linha.find('\n');
 	if (posicaoComentario != std::string::npos) {
-		std::string linhaSemComentarios = linha.substr(0, posicaoComentario);
-		return linhaSemComentarios;
+		linha.erase(posicaoComentario, posicaoPuloDeLinha);
+		return linha;
 	}
 	else {
 		// Linha não possui comentários
@@ -413,12 +414,18 @@ bool ParseLib::is_number(const std::string &s) {
 	return false;
 }
 
-std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(const std::string & arquivoEntradaNome) {
+std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEntradaNome) {
 	std::string arquivo = arquivoEntradaNome;
 	arquivo = this->removeTabulacoes(arquivo);
 	arquivo = this->removeEspacosEmBrancoExtras(arquivo);
+	arquivo = this->removeComentarios(arquivo);
 	setLinhasDoCodigo(this->separaEmLinhas(arquivo));
 	std::vector<std::string> codeLines = getLinhasDoCodigo();
+	for (auto& linha : codeLines) {
+		if (linha == "") {
+			codeLines.erase(std::remove(codeLines.begin(), codeLines.end(), linha), codeLines.end());
+		}
+	}
 	int contadorLinha = 1;
 	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
 	int contadorPosicao = 0;

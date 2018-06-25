@@ -33,8 +33,6 @@ public:
 
 	void setLinhasDoCodigo(const std::vector<std::string> &linhasDoCodigo);
 
-	std::vector<Montador::TokensDaLinha> parseTokens(const std::string & arquivoEntradaNome);
-
 	std::string removeEspacosEmBrancoExtras(const std::string &fileString);
 	std::string removeTabulacoes(std::string linha);
 	std::vector<std::string> separaEmLinhas(std::string fileString);
@@ -58,6 +56,8 @@ public:
 	int converteOperandoParaInteiro(std::string operando);
 
 	bool is_number(const std::string& s);
+
+	std::vector<Montador::TokensDaLinha> parseTokens(std::string arquivoEntradaNome);
 
 	int getContadorPosicao() const;
 

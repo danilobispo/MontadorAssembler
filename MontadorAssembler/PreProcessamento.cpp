@@ -97,8 +97,8 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool isSectionText = false;
 	bool isSectionData = false;
 	bool checaBeginEEnd = numeroDeArquivos == 2 ? true : false;
-	bool temBegin;
-	bool temEnd;
+	bool temBegin = false;
+	bool temEnd = false;
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
 		std::string label = tokensDaLinha[i].label;
@@ -188,7 +188,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			}
 			else if (operacao == "begin") {
 				if (!checaBeginEEnd) {
-					// ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
+					ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
 				else {
 					temBegin = true;
@@ -196,7 +196,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			} 
 			else if(operacao == "end") {
 				if (!checaBeginEEnd) {
-					// ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
+					ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
 				else {
 					temEnd = true;
@@ -222,27 +222,24 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			else if (operacao == "extern") {
 				// Quando a diretiva EXTERN é encontrada, insere o respectivo rótulo na TS com
 				// valor “zero absoluto” e a indicacao de símbolo externo;
-				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[0])) {
-					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[0]);
+				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(label)) {
+					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(label);
 					infoCopy.isExtern = true;
-					tabelaLib.modificaSimboloNaTabelaDeSimbolos(operando[0], infoCopy);
+					tabelaLib.modificaSimboloNaTabelaDeSimbolos(label, infoCopy);
 				}
-				tabelaLib.insereSimboloNaTabelaDeSimbolos(operando[0], InfoDeSimbolo(-2, -2, false, 0, true));
+				tabelaLib.insereSimboloNaTabelaDeSimbolos(label, InfoDeSimbolo(-2, -2, false, 0, true));
 			}
 		}
 		else {
 			ErrorLib errorLib(contadorLinha, "Operação não identificada!", "Léxico");
 		}
 		contadorLinha++;
-	}
+	} 
 	tabelaLib.montarTabelaDeDefinicoes();
 	//    std::cout << "Fim da primeira passagem!" << std::endl;
-	if (checaBeginEEnd && (!temBegin || !temEnd)) {
-		ErrorLib errorLib = ErrorLib(0, "O arquivo não possui as diretivas BEGIN e/ou END", "Restrição");
-	}
+	
 	showTabelaDeSimbolos();
 	showTabelaDeDefinicoes();
-	segundaPassagem();
 }
 
 bool PreProcessamento::isOperandoNumero(std::string operando) {
@@ -288,6 +285,57 @@ void PreProcessamento::showTabelaDeDefinicoes() {
 	}
 }
 
+void PreProcessamento::escreveTabelaDeDefinicoesNoArquivoDeSaida(std::string nomeDoArquivo)
+{
+	std::ofstream arquivoDeSaida;
+	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+	
+	TabelaLib tabelaLib;
+	std::map<std::string, InfoDeDefinicao> tabelaDeDefinicoes = tabelaLib.getTabelaDeDefinicoes();
+	for (auto &itemDeUso : tabelaDeDefinicoes) {
+		arquivoDeSaida << "D,";
+		arquivoDeSaida << itemDeUso.first << ",";
+		arquivoDeSaida << itemDeUso.second.valor << "\n";
+	}
+	arquivoDeSaida.close();
+}
+
+void PreProcessamento::escreveTabelaDeUsoNoArquivoDeSaida(std::string nomeDoArquivo)
+{
+	std::ofstream arquivoDeSaida;
+	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+
+	TabelaLib tabelaLib;
+	std::map<std::string, InfoDeUso> tabelaDeUso = tabelaLib.getTabelaDeUso();
+	for (auto &itemDeUso : tabelaDeUso) {
+		for (unsigned int i = 0; i < itemDeUso.second.valorList.size(); i++) {
+			arquivoDeSaida << "U,";
+			arquivoDeSaida << itemDeUso.first << ",";
+			arquivoDeSaida << itemDeUso.second.valorList[i] << "\n";
+		}
+	}
+	arquivoDeSaida.close();
+}
+
+void PreProcessamento::escreveMapaDeBitsNoArquivoDeSaida(std::string nomeDoArquivo, std::vector<int> mapaDeBits)
+{
+	std::ofstream arquivoDeSaida;
+	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+	arquivoDeSaida << "R:";
+	for (auto &bit : mapaDeBits) {
+		arquivoDeSaida << bit;
+	}
+	arquivoDeSaida.close();
+}
+
+void PreProcessamento::escreveTamanhoDoCodigoNoArquivoDeSaida(std::string nomeDoArquivo, int tamanho)
+{
+	std::ofstream arquivoDeSaida;
+	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+	arquivoDeSaida << "S:" << tamanho <<"\n";
+	arquivoDeSaida.close();
+}
+
 void PreProcessamento::showTabelaDeUso()
 {
 	TabelaLib tabelaLib;
@@ -303,8 +351,16 @@ void PreProcessamento::showTabelaDeUso()
 	}
 }
 
+void PreProcessamento::showMapaDeBits(std::vector<int> vetor)
+{
+	for (auto&item : vetor) {
+		std::cout << item;
+	}
+	std::cout << std::endl;
+}
 
-void PreProcessamento::segundaPassagem() {
+
+void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
@@ -313,8 +369,9 @@ void PreProcessamento::segundaPassagem() {
 	bool isSectionData = false;
 	int tamanhoCodigo = 0;
 	int enderecoOperando;
-	std::string nomeArquivoSaida = "teste";
-	std::ofstream arquivoDeSaida(nomeArquivoSaida + ".o");
+	std::vector<int> mapaDeBits;
+	std::ofstream arquivoDeSaida(nomeDoArquivo + ".o");
+	arquivoDeSaida << nomeDoArquivo << ":" << "\n";
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
 		std::string label = tokensDaLinha[i].label;
@@ -323,59 +380,115 @@ void PreProcessamento::segundaPassagem() {
 		int numeroDaLinha = tokensDaLinha[i].numeroDaLinha;
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
+		bool tem2Operandos;
 		
 
 		if (tabelaLib.isInstrucao(operacao)) {
 			infoDeInstrucoes = tabelaLib.getInstrucao(operacao);
 			tamanhoCodigo += infoDeInstrucoes.tamanho;
+			mapaDeBits.push_back(0); // Instrução não precisa ser relocada, logo recebe o bit 0
 			
 			for (unsigned int j = 0; j < numeroDeOperandos; j++) {
 				int valor = 0;
 				if (infoDeInstrucoes.opcodesInstrucoes != 14) { // STOP
-					enderecoOperando = tamanhoCodigo - j;
-				}
-				else {
-					arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
-				}
-
-				if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
-					tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+					enderecoOperando = tamanhoCodigo - (j+1);
 				}
 
 				// Tratamento de somas e subtrações no operando
 				if (operando[j].find('+') != std::string::npos) {
+					tem2Operandos = true;
 					std::string copia = operando[j];
-					operando[j] = operando[j].substr(0, operando[j].find('+'));
-					std::string temp = copia.substr(copia.find('+') + 1, copia.size());
-					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) {
-						// Primeiro operando e é variável local, com endereço já definido
-						valor = tabelaLib.obtemSimboloNaTabelaDeSimbolos(temp).valorConstante;
+					std::string operando1 = copia.substr(0, operando[j].find('+'));
+					copia = operando[j];
+					std::string operando2 = copia.substr(copia.find('+') + 1, copia.size());
+					if (isOperandoNumero(operando1)) {
+						valor = converteStringParaInt(operando1);
+						// Logo, o segundo operando DEVE ser um label
+						operando[j] = operando2;
+						// Caso de variável PUBLIC
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							// Primeiro operando e é variável local, com endereço já definido
+							valor += tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).valorConstante;
+						}
+						// Caso de variável EXTERN
+						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							enderecoOperando += valor;
+							valor = enderecoOperando;
+							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+						}
 					}
-					else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) { // Primeiro operando, caso do  operando ser variável extern
-						tabelaLib.insereSimboloNaTabelaDeUso(temp, InfoDeUso(enderecoOperando));
+					else if (isOperandoNumero(operando2)) {
+						valor = converteStringParaInt(operando2);
+						// Logo, o primeiro operando DEVE ser um label
+						operando[j] = operando1;
+						// Caso de variável PUBLIC
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							// Primeiro operando e é variável local, com endereço já definido
+							valor += tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).valorConstante;
+						}
+						// Caso de variável EXTERN
+						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							enderecoOperando += valor;
+							valor = enderecoOperando;
+							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+							
+						}
 					}
-					else {
-						valor = converteStringParaInt(temp);
-					}
-					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
-						tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+					// Caso de erro: Ou os dois operandos são números ou nenhum deles é label
+					else if ((isOperandoNumero(operando1) && isOperandoNumero(operando2)) || 
+						(!isOperandoNumero(operando1) && !isOperandoNumero(operando2))) {
+						ErrorLib errorlib = ErrorLib(numeroDaLinha, "Operandos inválidos", "Lexico");
 					}
 				}
 				else if (operando[j].find('-') != std::string::npos) {
+					tem2Operandos = true;
 					std::string copia = operando[j];
-					operando[j] = operando[j].substr(0, operando[j].find('-'));
-					std::string temp = copia.substr(copia.find('-') + 1, copia.size());
-					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) {
-						// Primeiro operando e é variável local, com endereço já definido
-						valor = tabelaLib.obtemSimboloNaTabelaDeSimbolos(temp).valorConstante;
+					std::string operando1 = copia.substr(0, operando[j].find('+'));
+					copia = operando[j];
+					std::string operando2 = copia.substr(copia.find('+') + 1, copia.size());
+					if (isOperandoNumero(operando1)) {
+						valor = converteStringParaInt(operando1);
+						// Logo, o segundo operando DEVE ser um label
+						operando[j] = operando2;
+						// Caso de variável PUBLIC
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							// Primeiro operando e é variável local, com endereço já definido
+							valor -= tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).valorConstante;
+						}
+						// Caso de variável EXTERN
+						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							enderecoOperando -= valor;
+							valor = enderecoOperando;
+							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+							
+						}
 					}
-					else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) { // Primeiro operando, caso do  operando ser variável extern
-						tabelaLib.insereSimboloNaTabelaDeUso(temp, InfoDeUso(enderecoOperando));
+					else if (isOperandoNumero(operando2)) {
+						valor = converteStringParaInt(operando2);
+						// Logo, o primeiro operando DEVE ser um label
+						operando[j] = operando1;
+						// Caso de variável PUBLIC
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							// Primeiro operando e é variável local, com endereço já definido
+							valor -= tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).valorConstante;
+						}
+						// Caso de variável EXTERN
+						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							enderecoOperando -= valor;
+							valor = enderecoOperando;
+							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+							
+						}
+						// Caso de erro: Ou os dois operandos são números ou nenhum deles é label
+						else if ((isOperandoNumero(operando1) && isOperandoNumero(operando2)) ||
+							(!isOperandoNumero(operando1) && !isOperandoNumero(operando2))) {
+							ErrorLib errorlib = ErrorLib(numeroDaLinha, "Operandos inválidos", "Lexico");
+						}
 					}
-					else {
-						valor = converteStringParaInt(temp);
-					}
-					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
+				}
+				else {
+					tem2Operandos = false; 
+					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Primeiro operando como variável extern sem adição ou subtração no operando
 						tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 					}
 				}
@@ -385,14 +498,22 @@ void PreProcessamento::segundaPassagem() {
 						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+							mapaDeBits.push_back(0);
 						}
 						else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							arquivoDeSaida << 0 << " ";
+							if (tem2Operandos) {
+								arquivoDeSaida << valor << " ";
+							} else {
+								arquivoDeSaida << 0 << " ";
+							}
+							
+							mapaDeBits.push_back(1);
 						}
 					}
 					else {
 						valor = converteStringParaInt(operando[j]);
 						arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+						mapaDeBits.push_back(0);
 					}
 				}
 			}
@@ -400,9 +521,19 @@ void PreProcessamento::segundaPassagem() {
 				arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 			}
 		}
+		else if (tabelaLib.isDiretiva(operacao) && 
+			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 2) { // CONST
+			arquivoDeSaida << operando[0] << " ";
+		}
 	}
 	showTabelaDeUso();
-	arquivoDeSaida.close();
+	showMapaDeBits(mapaDeBits);
+	arquivoDeSaida << "\n"; // Escreve um pulo de linha ao final do arquivo 
+	arquivoDeSaida.close();	// para indicarmos o início para a Tabela de Definições
+	escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
+	escreveTabelaDeUsoNoArquivoDeSaida(nomeDoArquivo + ".o");
+	escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
+	escreveMapaDeBitsNoArquivoDeSaida((nomeDoArquivo + ".o"), mapaDeBits);
 }
  
 //void PreProcessamento::processarDiretivas(int numeroDeArquivos) {
