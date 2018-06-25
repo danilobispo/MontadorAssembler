@@ -412,8 +412,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						}
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							enderecoOperando += valor;
-							valor = enderecoOperando;
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 						}
 					}
@@ -428,8 +426,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						}
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							enderecoOperando += valor;
-							valor = enderecoOperando;
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 							
 						}
@@ -457,8 +453,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						}
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							enderecoOperando -= valor;
-							valor = enderecoOperando;
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 							
 						}
@@ -474,8 +468,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						}
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							enderecoOperando -= valor;
-							valor = enderecoOperando;
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 							
 						}
