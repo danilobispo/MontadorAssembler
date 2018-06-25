@@ -97,6 +97,8 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool isSectionText = false;
 	bool isSectionData = false;
 	bool checaBeginEEnd = numeroDeArquivos == 2 ? true : false;
+	bool temBegin;
+	bool temEnd;
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
 		std::string label = tokensDaLinha[i].label;
@@ -188,10 +190,16 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				if (!checaBeginEEnd) {
 					// ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
+				else {
+					temBegin = true;
+				}
 			} 
 			else if(operacao == "end") {
 				if (!checaBeginEEnd) {
 					// ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
+				}
+				else {
+					temEnd = true;
 				}
 			}
 			else if (operacao == "public") {
@@ -229,6 +237,9 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	}
 	tabelaLib.montarTabelaDeDefinicoes();
 	//    std::cout << "Fim da primeira passagem!" << std::endl;
+	if (checaBeginEEnd && (!temBegin || !temEnd)) {
+		ErrorLib errorLib = ErrorLib(0, "O arquivo não possui as diretivas BEGIN e/ou END", "Restrição");
+	}
 	showTabelaDeSimbolos();
 	showTabelaDeDefinicoes();
 	segundaPassagem();
@@ -277,6 +288,21 @@ void PreProcessamento::showTabelaDeDefinicoes() {
 	}
 }
 
+void PreProcessamento::showTabelaDeUso()
+{
+	TabelaLib tabelaLib;
+	std::map<std::string, InfoDeUso> tabelaDeUso = tabelaLib.getTabelaDeUso();
+	std::string isExterno;
+	std::cout << "Tabela de Uso: " << std::endl;
+	for (auto &usoItem : tabelaDeUso) {
+		std::cout << "Simbolo: " << usoItem.first << std::endl;
+		for (unsigned int i = 0; i < usoItem.second.valorList.size(); i++) {
+			std::cout << "Valor: " << usoItem.second.valorList[i] << std::endl;
+		}
+		
+	}
+}
+
 
 void PreProcessamento::segundaPassagem() {
 	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
@@ -285,6 +311,8 @@ void PreProcessamento::segundaPassagem() {
 	int contadorPosicao = 0;
 	bool isSectionText = false;
 	bool isSectionData = false;
+	int tamanhoCodigo = 0;
+	int enderecoOperando;
 	std::string nomeArquivoSaida = "teste";
 	std::ofstream arquivoDeSaida(nomeArquivoSaida + ".o");
 
@@ -295,48 +323,86 @@ void PreProcessamento::segundaPassagem() {
 		int numeroDaLinha = tokensDaLinha[i].numeroDaLinha;
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
-		InfoDeDiretivas infoDeDiretivas;
+		
 
 		if (tabelaLib.isInstrucao(operacao)) {
 			infoDeInstrucoes = tabelaLib.getInstrucao(operacao);
-			for (int j = 0; j < numeroDeOperandos; j++) {
+			tamanhoCodigo += infoDeInstrucoes.tamanho;
+			
+			for (unsigned int j = 0; j < numeroDeOperandos; j++) {
 				int valor = 0;
+				if (infoDeInstrucoes.opcodesInstrucoes != 14) { // STOP
+					enderecoOperando = tamanhoCodigo - j;
+				}
+				else {
+					arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+				}
+
+				if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
+					tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
+				}
+
+				// Tratamento de somas e subtrações no operando
 				if (operando[j].find('+') != std::string::npos) {
 					std::string copia = operando[j];
 					operando[j] = operando[j].substr(0, operando[j].find('+'));
 					std::string temp = copia.substr(copia.find('+') + 1, copia.size());
-					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp)) {
+					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) {
+						// Primeiro operando e é variável local, com endereço já definido
 						valor = tabelaLib.obtemSimboloNaTabelaDeSimbolos(temp).valorConstante;
+					}
+					else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) { // Primeiro operando, caso do  operando ser variável extern
+						tabelaLib.insereSimboloNaTabelaDeUso(temp, InfoDeUso(enderecoOperando));
 					}
 					else {
 						valor = converteStringParaInt(temp);
-						//                        std::cout << "Valor: " << valor << std::endl;
+					}
+					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
+						tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 					}
 				}
 				else if (operando[j].find('-') != std::string::npos) {
 					std::string copia = operando[j];
 					operando[j] = operando[j].substr(0, operando[j].find('-'));
 					std::string temp = copia.substr(copia.find('-') + 1, copia.size());
-					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp)) {
+					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(temp) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) {
+						// Primeiro operando e é variável local, com endereço já definido
 						valor = tabelaLib.obtemSimboloNaTabelaDeSimbolos(temp).valorConstante;
+					}
+					else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(temp)) { // Primeiro operando, caso do  operando ser variável extern
+						tabelaLib.insereSimboloNaTabelaDeUso(temp, InfoDeUso(enderecoOperando));
 					}
 					else {
 						valor = converteStringParaInt(temp);
-						//                        std::cout << "Valor: " << valor << std::endl;
+					}
+					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Segundo operando, se em um operando X+Y, Y for variável extern
+						tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 					}
 				}
-				if (!isOperandoNumero(operando[j])) {
-					if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j])) {
+				// Escrita do código-fonte 
+				if (numeroDeOperandos > 0) {
+					if (!isOperandoNumero(operando[j])) {
 						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+						}
+						else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							arquivoDeSaida << 0 << " ";
+						}
+					}
+					else {
+						valor = converteStringParaInt(operando[j]);
 						arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
 					}
 				}
 			}
+			if (numeroDeOperandos == 0) { // Caso do STOP
+				arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+			}
 		}
 	}
-
+	showTabelaDeUso();
 	arquivoDeSaida.close();
-
 }
  
 //void PreProcessamento::processarDiretivas(int numeroDeArquivos) {

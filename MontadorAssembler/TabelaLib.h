@@ -62,7 +62,8 @@ struct InfoDeDefinicao {
 };
 
 struct InfoDeUso {
-	std::vector<int> enderecoList;
+	std::vector<int> valorList;
+	InfoDeUso(int valor);
 };
 
 struct InfoDeSimbolo {
@@ -105,11 +106,18 @@ public:
 	//Tabela de definições
 	void insereSimboloNaTabelaDeDefinicoes(std::string, InfoDeDefinicao);
 	void montarTabelaDeDefinicoes();
+	bool rotuloJaExistenteNaTabelaDeDefinicoes(std::string rotulo);
+	InfoDeDefinicao obtemSimboloNaTabelaDeDefinicoes(std::string id);
+
+	//Tabela de Uso
+	void insereSimboloNaTabelaDeUso(std::string, InfoDeUso);
+	InfoDeUso obtemSimboloNaTabelaDeUso(std::string id);
+	bool rotuloJaExistenteNaTabelaDeUso(std::string id);
 
 	const std::map<std::string, InfoDeDefinicao>& getTabelaDeDefinicoes() const;
 
-	//Tabela de uso
 	const std::map<std::string, InfoDeSimbolo> &getTabelaDeSimbolos() const;
+	const std::map<std::string, InfoDeUso> &getTabelaDeUso() const;
 
 	void setTabelaDeSimbolos(const std::map<std::string, InfoDeSimbolo> &TabelaDeSimbolos);
 

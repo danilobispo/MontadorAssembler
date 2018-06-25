@@ -32,6 +32,7 @@ public:
 	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos);
 	void showTabelaDeSimbolos();
 	void showTabelaDeDefinicoes();
+	void showTabelaDeUso();
 	void showCodigo();
 	void segundaPassagem();
 	void gerarCodigoObjeto();

@@ -103,12 +103,51 @@ void TabelaLib::montarTabelaDeDefinicoes()
 	}
 }
 
+bool TabelaLib::rotuloJaExistenteNaTabelaDeDefinicoes(std::string rotulo) {
+	return !(TabelaLib::TabelaDeDefinicoes.find(rotulo) == TabelaLib::TabelaDeDefinicoes.end());
+}
+
+
+InfoDeDefinicao TabelaLib::obtemSimboloNaTabelaDeDefinicoes(std::string id) {
+	return TabelaLib::TabelaDeDefinicoes.at(id);
+}
+
+void TabelaLib::insereSimboloNaTabelaDeUso(std::string key, InfoDeUso infoDeUso) {
+	if (rotuloJaExistenteNaTabelaDeUso(key)) { // Se o símbolo já existe, só adicionamos mais um valor à lista
+		if (infoDeUso.valorList.size() == 2) {
+			TabelaLib::TabelaDeUso.at(key).valorList.push_back(infoDeUso.valorList[0]);
+			TabelaLib::TabelaDeUso.at(key).valorList.push_back(infoDeUso.valorList[1]);
+		}
+		else {
+			TabelaLib::TabelaDeUso.at(key).valorList.push_back(infoDeUso.valorList[0]);
+		}
+		
+	}
+	else {
+		TabelaLib::TabelaDeUso.insert(std::make_pair(key, infoDeUso));
+	}
+}
+
+InfoDeUso TabelaLib::obtemSimboloNaTabelaDeUso(std::string id){
+	return TabelaLib::TabelaDeUso.at(id);
+}
+
+bool TabelaLib::rotuloJaExistenteNaTabelaDeUso(std::string id) {
+	return !(TabelaLib::TabelaDeUso.find(id) == TabelaLib::TabelaDeUso.end());
+}
+
+
 const std::map<std::string, InfoDeDefinicao> &TabelaLib::getTabelaDeDefinicoes() const {
 	return TabelaDeDefinicoes;
 }
 
 const std::map<std::string, InfoDeSimbolo> &TabelaLib::getTabelaDeSimbolos() const {
 	return TabelaDeSimbolos;
+}
+
+const std::map<std::string, InfoDeUso>& TabelaLib::getTabelaDeUso() const
+{
+	return TabelaDeUso;
 }
 
 void TabelaLib::setTabelaDeSimbolos(const std::map<std::string, InfoDeSimbolo> &TabelaDeSimbolos) {
@@ -121,4 +160,9 @@ InfoDeSimbolo TabelaLib::obtemSimboloNaTabelaDeSimbolos(std::string id) {
 
 void TabelaLib::esvaziarTabelaDeSimbolos() {
 	TabelaLib::TabelaDeSimbolos.clear();
+}
+
+InfoDeUso::InfoDeUso(int valor)
+{
+	valorList.push_back(valor);
 }
