@@ -485,6 +485,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 					}
 				}
 				// Escrita do código-fonte 
+				arquivoDeSaida << "C:";
 				if (numeroDeOperandos > 0) {
 					if (!isOperandoNumero(operando[j])) {
 						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
