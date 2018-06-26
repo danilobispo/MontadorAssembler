@@ -372,6 +372,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 	std::vector<int> mapaDeBits;
 	std::ofstream arquivoDeSaida(nomeDoArquivo + ".o");
 	arquivoDeSaida << nomeDoArquivo << ":" << "\n";
+	arquivoDeSaida << "C:";
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
 		std::string label = tokensDaLinha[i].label;
@@ -381,7 +382,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
 		bool tem2Operandos;
-		
 
 		if (tabelaLib.isInstrucao(operacao)) {
 			infoDeInstrucoes = tabelaLib.getInstrucao(operacao);
@@ -485,7 +485,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 					}
 				}
 				// Escrita do código-fonte 
-				arquivoDeSaida << "C:";
 				if (numeroDeOperandos > 0) {
 					if (!isOperandoNumero(operando[j])) {
 						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
