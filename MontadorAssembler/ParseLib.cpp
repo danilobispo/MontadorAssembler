@@ -425,6 +425,31 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEn
 		if (linha == "") {
 			codeLines.erase(std::remove(codeLines.begin(), codeLines.end(), linha), codeLines.end());
 		}
+		else if (linha.find('+') != std::string::npos || linha.find('-') != std::string::npos) {
+			std::string::size_type i = 0;
+			std::string::size_type posicao = linha.find('+');
+			if (posicao == std::string::npos) {
+				posicao = linha.find('-');
+			}
+			i = posicao;
+			i++;
+			while (linha.at(i) == ' ') {
+				i++;
+			}
+			if (linha.at(posicao) != ' ') {
+				linha.erase(std::remove_if(linha.begin() + posicao, linha.end(), isspace), linha.end());
+				i = posicao;
+				i--;
+			}
+			while (linha.at(i) == ' ') {
+				i--;
+			}
+			if (linha.at(posicao) != ' ') {
+				linha.erase(std::remove_if(linha.begin() + i, linha.end(), isspace), linha.end());
+				i = posicao;
+				i--;
+			}
+		}
 	}
 	int contadorLinha = 1;
 	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
