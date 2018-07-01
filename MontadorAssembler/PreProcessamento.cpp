@@ -388,6 +388,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 			tamanhoCodigo += infoDeInstrucoes.tamanho;
 			mapaDeBits.push_back(0); // Instrução não precisa ser relocada, logo recebe o bit 0
 			
+			
 			for (unsigned int j = 0; j < numeroDeOperandos; j++) {
 				int valor = 0;
 				if (infoDeInstrucoes.opcodesInstrucoes != 14) { // STOP
@@ -515,7 +516,25 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 		}
 		else if (tabelaLib.isDiretiva(operacao) && 
 			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 2) { // CONST
+			tamanhoCodigo++;
 			arquivoDeSaida << operando[0] << " ";
+			mapaDeBits.push_back(0);
+		}
+		else if (tabelaLib.isDiretiva(operacao) &&
+			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 1) { // SPACE
+			if (operando.size() != 0) {
+				int numero = converteStringParaInt(operando[0]);
+				tamanhoCodigo += numero;
+				for (int i = 0; i < numero; i++) {
+					arquivoDeSaida << "00" << " ";
+					mapaDeBits.push_back(0);
+				}
+			}
+			else {
+				arquivoDeSaida << "00" << " ";
+				mapaDeBits.push_back(0);
+				tamanhoCodigo++;
+			}		
 		}
 	}
 	showTabelaDeUso();
