@@ -83,7 +83,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 										   //Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
 			std::string op1, op2;
 			op1 = tokensLinhas[2].substr(0, tokensLinhas[2].find(','));
-			op2 = tokensLinhas[2].substr(tokensLinhas[2].find(','), tokensLinhas[2].size());
+			op2 = tokensLinhas[2].substr(tokensLinhas[2].find(',')+1, tokensLinhas[2].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
@@ -134,7 +134,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 					"Léxico");
 			}
 			op1 = tokensLinhas[1].substr(0, tokensLinhas[1].find(','));
-			op2 = tokensLinhas[1].substr(tokensLinhas[1].find(','), tokensLinhas[1].size());
+			op2 = tokensLinhas[1].substr(tokensLinhas[1].find(',')+1, tokensLinhas[1].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}

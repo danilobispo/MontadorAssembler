@@ -392,7 +392,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 			for (unsigned int j = 0; j < numeroDeOperandos; j++) {
 				int valor = 0;
 				if (infoDeInstrucoes.opcodesInstrucoes != 14) { // STOP
-					enderecoOperando = tamanhoCodigo - (j+1);
+					enderecoOperando = tamanhoCodigo - (j + 1);
 				}
 
 				// Tratamento de somas e subtrações no operando
@@ -428,11 +428,11 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
-							
+
 						}
 					}
 					// Caso de erro: Ou os dois operandos são números ou nenhum deles é label
-					else if ((isOperandoNumero(operando1) && isOperandoNumero(operando2)) || 
+					else if ((isOperandoNumero(operando1) && isOperandoNumero(operando2)) ||
 						(!isOperandoNumero(operando1) && !isOperandoNumero(operando2))) {
 						ErrorLib errorlib = ErrorLib(numeroDaLinha, "Operandos inválidos", "Lexico");
 					}
@@ -455,7 +455,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
-							
+
 						}
 					}
 					else if (isOperandoNumero(operando2)) {
@@ -470,7 +470,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 						// Caso de variável EXTERN
 						else if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && !tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
-							
+
 						}
 						// Caso de erro: Ou os dois operandos são números ou nenhum deles é label
 						else if ((isOperandoNumero(operando1) && isOperandoNumero(operando2)) ||
@@ -480,38 +480,87 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 					}
 				}
 				else {
-					tem2Operandos = false; 
+					tem2Operandos = false;
 					if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) { // Primeiro operando como variável extern sem adição ou subtração no operando
 						tabelaLib.insereSimboloNaTabelaDeUso(operando[j], InfoDeUso(enderecoOperando));
 					}
 				}
 				// Escrita do código-fonte 
 				if (numeroDeOperandos > 0) {
-					if (!isOperandoNumero(operando[j])) {
-						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
-						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-							mapaDeBits.push_back(0);
-						}
-						else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							if (tem2Operandos) {
-								arquivoDeSaida << valor << " ";
-							} else {
-								arquivoDeSaida << 0 << " ";
+					if (numeroDeOperandos == 2) { // CASO DO COPY
+						if (j == 0) {
+							arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+							if (!isOperandoNumero(operando[j])) {
+								if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+									arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+									mapaDeBits.push_back(0);
+								}
+								else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+									if (tem2Operandos) {
+										arquivoDeSaida << valor << " ";
+									}
+									else {
+										arquivoDeSaida << 0 << " ";
+									}
+									mapaDeBits.push_back(1);
+								}
 							}
-							
-							mapaDeBits.push_back(1);
+							else {
+								valor = converteStringParaInt(operando[j]);
+								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+								mapaDeBits.push_back(0);
+							}
+						}
+						else if (j == 1) {
+							if (!isOperandoNumero(operando[j])) {
+								if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+									arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+									mapaDeBits.push_back(0);
+								}
+								else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+									if (tem2Operandos) {
+										arquivoDeSaida << valor << " ";
+									}
+									else {
+										arquivoDeSaida << 0 << " ";
+									}
+									mapaDeBits.push_back(1);
+								}
+							}
+							else {
+								valor = converteStringParaInt(operando[j]);
+								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+								mapaDeBits.push_back(0);
+							}
 						}
 					}
 					else {
-						valor = converteStringParaInt(operando[j]);
-						arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-						mapaDeBits.push_back(0);
+						if (!isOperandoNumero(operando[j])) {
+							arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+							if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+								mapaDeBits.push_back(0);
+							}
+							else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+								if (tem2Operandos) {
+									arquivoDeSaida << valor << " ";
+								}
+								else {
+									arquivoDeSaida << 0 << " ";
+								}
+								mapaDeBits.push_back(1);
+							}
+						}
+						else {
+							valor = converteStringParaInt(operando[j]);
+							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+							mapaDeBits.push_back(0);
+						}
 					}
 				}
-			}
-			if (numeroDeOperandos == 0) { // Caso do STOP
-				arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+				if (numeroDeOperandos == 0) { // Caso do STOP
+					arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+				}
 			}
 		}
 		else if (tabelaLib.isDiretiva(operacao) && 
