@@ -119,7 +119,8 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				InfoDeSimbolo infoSimbolo = tabelaLib.obtemSimboloNaTabelaDeSimbolos(label);
 				infoSimbolo.endereco = contadorPosicao;
 				tabelaLib.modificaSimboloNaTabelaDeSimbolos(label, infoSimbolo);
-			} else {
+			}
+			else {
 				ErrorLib errorLib(contadorLinha, "Redeclaração de rótulo " + label, "Léxico");
 			}
 		}
@@ -193,8 +194,8 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				else {
 					temBegin = true;
 				}
-			} 
-			else if(operacao == "end") {
+			}
+			else if (operacao == "end") {
 				if (!checaBeginEEnd) {
 					ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
@@ -215,10 +216,11 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 					InfoDeSimbolo infoCopy = tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[0]);
 					infoCopy.isExtern = false;
 					tabelaLib.modificaSimboloNaTabelaDeSimbolos(operando[0], infoCopy);
-				} else {
+				}
+				else {
 					tabelaLib.insereSimboloNaTabelaDeSimbolos(operando[0], InfoDeSimbolo(-2, -2, false, 0, false));
 				}
-			} 
+			}
 			else if (operacao == "extern") {
 				// Quando a diretiva EXTERN é encontrada, insere o respectivo rótulo na TS com
 				// valor “zero absoluto” e a indicacao de símbolo externo;
@@ -234,10 +236,10 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			ErrorLib errorLib(contadorLinha, "Operação não identificada!", "Léxico");
 		}
 		contadorLinha++;
-	} 
+	}
 	tabelaLib.montarTabelaDeDefinicoes();
 	//    std::cout << "Fim da primeira passagem!" << std::endl;
-	
+
 	showTabelaDeSimbolos();
 	showTabelaDeDefinicoes();
 }
@@ -268,9 +270,9 @@ void PreProcessamento::showTabelaDeSimbolos() {
 	std::cout << "Tabela de Símbolos: " << std::endl;
 	for (auto &tabelaDeSimbolo : tabelaDeSimbolos) {
 		isExterno = tabelaDeSimbolo.second.isExtern ? "true" : "false";
-		        std::cout << "Simbolo: " << tabelaDeSimbolo.first << std::endl;
-		        std::cout << "Valor: " << tabelaDeSimbolo.second.endereco << std::endl;
-				std::cout << "Externo? : " << isExterno << std::endl;
+		std::cout << "Simbolo: " << tabelaDeSimbolo.first << std::endl;
+		std::cout << "Valor: " << tabelaDeSimbolo.second.endereco << std::endl;
+		std::cout << "Externo? : " << isExterno << std::endl;
 	}
 }
 
@@ -289,7 +291,7 @@ void PreProcessamento::escreveTabelaDeDefinicoesNoArquivoDeSaida(std::string nom
 {
 	std::ofstream arquivoDeSaida;
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
-	
+
 	TabelaLib tabelaLib;
 	std::map<std::string, InfoDeDefinicao> tabelaDeDefinicoes = tabelaLib.getTabelaDeDefinicoes();
 	for (auto &itemDeUso : tabelaDeDefinicoes) {
@@ -332,7 +334,7 @@ void PreProcessamento::escreveTamanhoDoCodigoNoArquivoDeSaida(std::string nomeDo
 {
 	std::ofstream arquivoDeSaida;
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
-	arquivoDeSaida << "S:" << tamanho <<"\n";
+	arquivoDeSaida << "S:" << tamanho << "\n";
 	arquivoDeSaida.close();
 }
 
@@ -347,7 +349,7 @@ void PreProcessamento::showTabelaDeUso()
 		for (unsigned int i = 0; i < usoItem.second.valorList.size(); i++) {
 			std::cout << "Valor: " << usoItem.second.valorList[i] << std::endl;
 		}
-		
+
 	}
 }
 
@@ -381,14 +383,14 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 		int numeroDaLinha = tokensDaLinha[i].numeroDaLinha;
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
-		bool tem2Operandos;
+		bool tem2Operandos = false;
 
 		if (tabelaLib.isInstrucao(operacao)) {
 			infoDeInstrucoes = tabelaLib.getInstrucao(operacao);
 			tamanhoCodigo += infoDeInstrucoes.tamanho;
 			mapaDeBits.push_back(0); // Instrução não precisa ser relocada, logo recebe o bit 0
-			
-			
+
+
 			for (unsigned int j = 0; j < numeroDeOperandos; j++) {
 				int valor = 0;
 				if (infoDeInstrucoes.opcodesInstrucoes != 14) { // STOP
@@ -487,83 +489,37 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 				}
 				// Escrita do código-fonte 
 				if (numeroDeOperandos > 0) {
-					if (numeroDeOperandos == 2) { // CASO DO COPY
-						if (j == 0) {
-							arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
-							if (!isOperandoNumero(operando[j])) {
-								if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-									arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-									mapaDeBits.push_back(0);
-								}
-								else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-									if (tem2Operandos) {
-										arquivoDeSaida << valor << " ";
-									}
-									else {
-										arquivoDeSaida << 0 << " ";
-									}
-									mapaDeBits.push_back(1);
-								}
-							}
-							else {
-								valor = converteStringParaInt(operando[j]);
-								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-								mapaDeBits.push_back(0);
-							}
-						}
-						else if (j == 1) {
-							if (!isOperandoNumero(operando[j])) {
-								if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-									arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-									mapaDeBits.push_back(0);
-								}
-								else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-									if (tem2Operandos) {
-										arquivoDeSaida << valor << " ";
-									}
-									else {
-										arquivoDeSaida << 0 << " ";
-									}
-									mapaDeBits.push_back(1);
-								}
-							}
-							else {
-								valor = converteStringParaInt(operando[j]);
-								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-								mapaDeBits.push_back(0);
-							}
-						}
+					if (j != 1) {
+						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 					}
-					else {
-						if (!isOperandoNumero(operando[j])) {
-							arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
-							if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-								arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
-								mapaDeBits.push_back(0);
-							}
-							else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-								if (tem2Operandos) {
-									arquivoDeSaida << valor << " ";
-								}
-								else {
-									arquivoDeSaida << 0 << " ";
-								}
-								mapaDeBits.push_back(1);
-							}
-						}
-						else {
-							valor = converteStringParaInt(operando[j]);
+					if (!isOperandoNumero(operando[j])) {
+						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
 							mapaDeBits.push_back(0);
 						}
+						else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
+							if (tem2Operandos) {
+								arquivoDeSaida << valor << " ";
+							}
+							else {
+								arquivoDeSaida << 0 << " ";
+							}
+
+							mapaDeBits.push_back(1);
+						}
+					}
+					else {
+						valor = converteStringParaInt(operando[j]);
+						arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+						mapaDeBits.push_back(0);
 					}
 				}
-				if (numeroDeOperandos == 0) { // Caso do STOP
-					arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
-				}
+			}
+			if (numeroDeOperandos == 0) { // Caso do STOP
+				arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 			}
 		}
-		else if (tabelaLib.isDiretiva(operacao) && 
+		else if (tabelaLib.isDiretiva(operacao) &&
 			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 2) { // CONST
 			tamanhoCodigo++;
 			arquivoDeSaida << operando[0] << " ";
@@ -583,7 +539,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 				arquivoDeSaida << "00" << " ";
 				mapaDeBits.push_back(0);
 				tamanhoCodigo++;
-			}		
+			}
 		}
 	}
 	showTabelaDeUso();
@@ -595,7 +551,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 	escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
 	escreveMapaDeBitsNoArquivoDeSaida((nomeDoArquivo + ".o"), mapaDeBits);
 }
- 
+
 //void PreProcessamento::processarDiretivas(int numeroDeArquivos) {
 //	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 //	// Cópia das linhas tokenizadas do código, como se o if for falso a linha seguinte não será processada,
