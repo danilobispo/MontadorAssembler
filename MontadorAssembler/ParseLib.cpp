@@ -69,6 +69,8 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 	// se tiver label, a token[0] é o label e token[1] é a operação:
 	std::vector<std::string> operandosString;
 	std::vector<int> operandos;
+	std::regex operandosHexa("0[xX][0-9a-fA-F]+");
+	std::regex operandosHexaNegativo("-0[xX][0-9a-fA-F]+");
 
 	if (hasLabel) {
 		if (numeroDeOperandos == 0) { // Caso de algumas diretivas
@@ -83,7 +85,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 										   //Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
 			std::string op1, op2;
 			op1 = tokensLinhas[2].substr(0, tokensLinhas[2].find(','));
-			op2 = tokensLinhas[2].substr(tokensLinhas[2].find(',')+1, tokensLinhas[2].size());
+			op2 = tokensLinhas[2].substr(tokensLinhas[2].find(',') + 1, tokensLinhas[2].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
@@ -134,7 +136,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 					"Léxico");
 			}
 			op1 = tokensLinhas[1].substr(0, tokensLinhas[1].find(','));
-			op2 = tokensLinhas[1].substr(tokensLinhas[1].find(',')+1, tokensLinhas[1].size());
+			op2 = tokensLinhas[1].substr(tokensLinhas[1].find(',') + 1, tokensLinhas[1].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
@@ -163,20 +165,14 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 			}
 		}
 	}
-	// TODO: Realocar essa parte do método em outro lugar
-	/*    std::regex operandosHexa("/(0x([0-9]+))/g");
 
 	// Verifica nessa sessão se o operando em questão é um número(decimal ou hexadecimal), ou um label
 	for (auto &i : operandosString) {
-	if (is_number(i)) { // Caso de operando ser inteiro:
-	// Converte para inteiro
-	operandos.push_back(std::stoi(i));
-	} else if (std::regex_match(i, operandosHexa)) { // Caso de operando ser hexadecimal:
-	operandos.push_back(converteOperandoHexaParaInteiro(i));
+		if (std::regex_match(i, operandosHexa) ||
+		std::regex_match(i, operandosHexaNegativo)) { // Caso de operando ser hexadecimal:
+			i = std::to_string(converteOperandoHexaParaInteiro(i));
+		}
 	}
-	//TODO:: Implementar essa condição
-	//        } else if (//Operando is label){ // Caso de operando ser label
-	}*/
 
 	return operandosString;
 }
@@ -425,7 +421,8 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEn
 		if (linha == "") {
 			codeLines.erase(std::remove(codeLines.begin(), codeLines.end(), linha), codeLines.end());
 		}
-		else if (linha.find('+') != std::string::npos || linha.find('-') != std::string::npos) {
+		// Remoção dessa área do código pois operandos negativos como no CONST eram parseados incorretamente
+		/*else if (linha.find('+') != std::string::npos || linha.find('-') != std::string::npos) {
 			std::string::size_type i = 0;
 			std::string::size_type posicao = linha.find('+');
 			if (posicao == std::string::npos) {
@@ -449,7 +446,7 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEn
 				i = posicao;
 				i--;
 			}
-		}
+		}*/
 	}
 	int contadorLinha = 1;
 	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
