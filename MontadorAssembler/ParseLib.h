@@ -32,7 +32,7 @@ public:
 	const std::vector<std::string> &getLinhasDoCodigo() const;
 
 	void setLinhasDoCodigo(const std::vector<std::string> &linhasDoCodigo);
-
+	std::string removeCaracteresEspeciais(std::string str);
 	std::string removeEspacosEmBrancoExtras(const std::string &fileString);
 	std::string removeTabulacoes(std::string linha);
 	std::vector<std::string> separaEmLinhas(std::string fileString);
@@ -68,3 +68,4 @@ public:
 	void setContadorLinha(int contadorLinha);
 };
 
+bool isNotAlnum(char c);

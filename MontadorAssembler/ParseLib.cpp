@@ -1,6 +1,7 @@
 #include "ParseLib.h"
 #include <iostream>
 #include <regex>
+#include <cctype>
 #include <sstream>
 #include "TabelaLib.h"
 #include "ErrorLib.h"
@@ -169,7 +170,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 	// Verifica nessa sessão se o operando em questão é um número(decimal ou hexadecimal), ou um label
 	for (auto &i : operandosString) {
 		if (std::regex_match(i, operandosHexa) ||
-		std::regex_match(i, operandosHexaNegativo)) { // Caso de operando ser hexadecimal:
+			std::regex_match(i, operandosHexaNegativo)) { // Caso de operando ser hexadecimal:
 			i = std::to_string(converteOperandoHexaParaInteiro(i));
 		}
 	}
@@ -274,7 +275,7 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &fileString) {
 	// Solução adaptada de https://stackoverflow.com/a/35302029
 	std::string output;
-	output.clear();  // unless you want to add at the end of existing sring...
+	output.clear();
 	unique_copy(fileString.begin(),
 		fileString.end(),
 		std::back_insert_iterator<std::string>(output),
@@ -289,7 +290,10 @@ std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &fileString)
 }
 
 std::string ParseLib::removeTabulacoes(std::string fileString) {
-	fileString.erase(std::remove(fileString.begin(), fileString.end(), '\t'), fileString.end());
+	// Remove tabulações transformando-as em espaços em branco, caso os espaços em branco sejam redundantes, 
+	// o passo de remover espaços em branco irá remover a redundância.
+	fileString = std::regex_replace(fileString, std::regex("\t"), " ");
+	// fileString.erase(std::remove(fileString.begin(), fileString.end(), '\t'), fileString.end());
 	return fileString;
 }
 
@@ -343,6 +347,17 @@ const std::vector<std::string> &ParseLib::getLinhasDoCodigo() const {
 
 void ParseLib::setLinhasDoCodigo(const std::vector<std::string> &linhasDoCodigo) {
 	ParseLib::linhasDoCodigo = linhasDoCodigo;
+}
+
+std::string ParseLib::removeCaracteresEspeciais(std::string str)
+{
+	str.erase(std::remove_if(str.begin(), str.end(), isNotAlnum), str.end());
+	return str;
+}
+
+bool isNotAlnum (char c) {
+	// Alguns caracteres extras foram adicionados pois não podemos removê-los ou comprometemos a tokenização
+	return std::isalnum(static_cast<unsigned char>(c)) == 0 && (c != ';' && c != '\n' && c != ' ' && c!= ':');
 }
 
 const std::string &ParseLib::getArquivo() const {
@@ -412,9 +427,10 @@ bool ParseLib::is_number(const std::string &s) {
 
 std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEntradaNome) {
 	std::string arquivo = arquivoEntradaNome;
-	arquivo = this->removeTabulacoes(arquivo);
-	arquivo = this->removeEspacosEmBrancoExtras(arquivo);
-	arquivo = this->removeComentarios(arquivo);
+	arquivo = removeCaracteresEspeciais(arquivo);
+	arquivo = removeTabulacoes(arquivo);
+	arquivo = removeEspacosEmBrancoExtras(arquivo);
+	arquivo = removeComentarios(arquivo);
 	setLinhasDoCodigo(this->separaEmLinhas(arquivo));
 	std::vector<std::string> codeLines = getLinhasDoCodigo();
 	for (auto& linha : codeLines) {
