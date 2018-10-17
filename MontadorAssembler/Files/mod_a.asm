@@ -1,17 +1,17 @@
-;Codigo fonte do modulo A
+;Co
 
-Y: EXTERN	;Esse é um comentário separado por tab
+Y: EXTERN	;co
 MOD_B: 
-EXTERN  ;Esse é um comentário separado por dois espaços
+EXTERN  ;co
 PUBLIC VAL
 PUBLIC L1
 SECTION TEXT
 INPUT Y
-ROT2: 
-		LOAD VAL
+ROT2:	LOAD VAL
 ADD Y; loko demais
 STORE Y+2
 JMPP MOD_B
 L1: STOP
+COPY A, B
 SECTION DATA
 VAL: CONST 0x5

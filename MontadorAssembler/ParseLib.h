@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include "Montador.h"
+
+
 class ParseLib
 {
 protected:
@@ -27,7 +29,7 @@ public:
 	std::string parseOperacao(std::string linha, bool hasLabel);
 	std::vector<std::string> parseOperando(std::string linha, int numeroDeOperandos, bool hasLabel);
 
-	Montador::TokensDaLinha parseLinha(std::string linha, int linhaContador, int posicaoContador);
+	Montador::TokensDaLinha parseLinha(std::string linha, int linhaContador);
 
 	const std::vector<std::string> &getLinhasDoCodigo() const;
 

@@ -52,8 +52,8 @@ struct InfoDeInstrucoes {
 struct InfoDeDiretivas {
 	int numeroDeOperandos;
 	int tamanho;
-	diretivas diretivasDiretivas; // nome horrível, aceito sugestoes
-	bool isPre;
+	diretivas diretivasKey;
+	bool isPre; //ve se ela é avaliada no pré-processamento
 };
 
 struct InfoDeDefinicao {
@@ -70,7 +70,7 @@ struct InfoDeSimbolo {
 	int endereco; // -1 significa endereço indefinido
 	int espaco; // -1 significa espaço indefinido
 
-	bool isConstante; // false funcionará para
+	bool isConstante; // para saber se o Simbolo é uma constante
 	int valorConstante; // Talvez não seja necessário, já que o .o não faz cálculos com o valor absoluto da constante
 						// -1 significa valor indefinido
 	bool isExtern;

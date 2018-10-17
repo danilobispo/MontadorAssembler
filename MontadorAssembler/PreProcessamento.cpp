@@ -90,7 +90,7 @@ void PreProcessamento::montarCodigo(std::string nomeArquivoSaida) {
 	primeiraPassagem(tokensDaLinha, 2);
 }
 
-void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos) {
+void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDoArquivo, int numeroDeArquivos) {
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
@@ -100,11 +100,11 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool temBegin = false;
 	bool temEnd = false;
 
-	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
-		std::string label = tokensDaLinha[i].label;
-		std::string operacao = tokensDaLinha[i].operacao;
-		std::vector<std::string> operando = tokensDaLinha[i].operando;
-		int numeroDaLinha = tokensDaLinha[i].numeroDaLinha;
+	for (unsigned int i = 0; i < tokensDoArquivo.size(); i++) {
+		std::string label = tokensDoArquivo[i].label; // #ver nao to entendo o que isso e as linhas de baixo fazem. como se sabe o que é label o que é operaçao...
+		std::string operacao = tokensDoArquivo[i].operacao;
+		std::vector<std::string> operando = tokensDoArquivo[i].operando;
+		int numeroDaLinha = tokensDoArquivo[i].numeroDaLinha;
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
 		InfoDeDiretivas infoDeDiretivas;
@@ -520,13 +520,13 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 			}
 		}
 		else if (tabelaLib.isDiretiva(operacao) &&
-			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 2) { // CONST
+			tabelaLib.getDiretiva(operacao).diretivasKey == 2) { // CONST
 			tamanhoCodigo++;
 			arquivoDeSaida << operando[0] << " ";
 			mapaDeBits.push_back(0);
 		}
 		else if (tabelaLib.isDiretiva(operacao) &&
-			tabelaLib.getDiretiva(operacao).diretivasDiretivas == 1) { // SPACE
+			tabelaLib.getDiretiva(operacao).diretivasKey == 1) { // SPACE
 			if (operando.size() != 0) {
 				int numero = converteStringParaInt(operando[0]);
 				tamanhoCodigo += numero;

@@ -178,23 +178,25 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 	return operandosString;
 }
 
-std::string ParseLib::removeComentarios(std::string linha) {
+std::string ParseLib::removeComentarios(std::string arquivoConteudo) {
 	// Comentários são definidos por um ponto e vírgula antes do comentário em si, então
-	// separaremos a linha pelo delimitador ;
-	// Verificamos antes se a linha possui comentários, e então fazemos a remoção de string
-	std::string::size_type posicaoComentario = linha.find(';');
-	std::string::size_type posicaoPuloDeLinha = linha.find('\n');
-	if (posicaoComentario != std::string::npos) {
-		linha.erase(posicaoComentario, posicaoPuloDeLinha);
-		return linha;
+	// separaremos a arquivoConteudo pelo delimitador ;
+	// Verificamos antes se a arquivoConteudo possui comentários, e então fazemos a remoção de string
+	std::string::size_type posicaoComentario = posicaoComentario = arquivoConteudo.find(';');
+	while (posicaoComentario != std::string::npos) {
+				
+		std::string::size_type posicaoFinal = posicaoComentario;
+		while (arquivoConteudo[posicaoFinal] != '\n') {
+			posicaoFinal++;
+		}
+
+		arquivoConteudo.erase(posicaoComentario, posicaoFinal);
+		posicaoComentario = arquivoConteudo.find(';');
 	}
-	else {
-		// Linha não possui comentários
-		return linha;
-	}
+	return arquivoConteudo;
 }
 
-Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContador, int contadorPosicao) {
+Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContador) {
 	TabelaLib tabelaLib;
 
 	// Faz a separação dos tokens de uma linha, podemos ter 3 opções:
@@ -230,7 +232,7 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 		InfoDeDiretivas infoDeDiretivas = tabelaLib.getDiretiva(labelOperacao);
 		// DEBUG Diretiva
 		//        std::cout << "infos de diretiva: " << std::endl;
-		//        std::cout << "diretiva: " << infoDeDiretivas.diretivasDiretivas << std::endl;
+		//        std::cout << "diretiva: " << infoDeDiretivas.diretivasKey << std::endl;
 		//        std::cout << "/numero de operandos: " << infoDeDiretivas.numeroDeOperandos << std::endl;
 		//        std::cout << "tamanho: " << infoDeDiretivas.tamanho << std::endl ;
 		//        std::cout << "isPre: " << infoDeDiretivas.isPre << std::endl << std::endl;
@@ -272,12 +274,12 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 }
 
 
-std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &fileString) {
+std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &arquivoConteudo) {
 	// Solução adaptada de https://stackoverflow.com/a/35302029
 	std::string output;
 	output.clear();
-	unique_copy(fileString.begin(),
-		fileString.end(),
+	unique_copy(arquivoConteudo.begin(),
+		arquivoConteudo.end(),
 		std::back_insert_iterator<std::string>(output),
 		[](char a, char b) { return isspace(a) && isspace(b); });
 
@@ -322,11 +324,9 @@ void ParseLib::preparaCodigo(std::string operacao, const std::string &arquivoEnt
 	std::vector<std::string> codeLines = getLinhasDoCodigo();
 	int contadorLinha = 1;
 	setContadorLinha(contadorLinha);
-	int contadorPosicao = 0;
 	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
-	setContadorPosicao(contadorPosicao);
 	for (auto &codeLine : codeLines) {
-		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha, contadorPosicao);
+		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
 		listTokensDaLinha.push_back(tokensDaLinha);
 		contadorLinha++;
 	}
@@ -425,13 +425,12 @@ bool ParseLib::is_number(const std::string &s) {
 	return false;
 }
 
-std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEntradaNome) {
-	std::string arquivo = arquivoEntradaNome;
-	arquivo = removeCaracteresEspeciais(arquivo);
-	arquivo = removeTabulacoes(arquivo);
-	arquivo = removeEspacosEmBrancoExtras(arquivo);
-	arquivo = removeComentarios(arquivo);
-	setLinhasDoCodigo(this->separaEmLinhas(arquivo));
+std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoConteudo) {
+	arquivoConteudo = removeComentarios(arquivoConteudo);
+	arquivoConteudo = removeCaracteresEspeciais(arquivoConteudo);
+	arquivoConteudo = removeTabulacoes(arquivoConteudo);
+	arquivoConteudo = removeEspacosEmBrancoExtras(arquivoConteudo);
+	setLinhasDoCodigo(this->separaEmLinhas(arquivoConteudo)); // TODO tirar essa redundancia de usar set e dps get
 	std::vector<std::string> codeLines = getLinhasDoCodigo();
 	for (auto& linha : codeLines) {
 		if (linha == "") {
@@ -469,7 +468,7 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoEn
 	int contadorPosicao = 0;
 	setContadorPosicao(contadorPosicao);
 	for (auto &codeLine : codeLines) {
-		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha, contadorPosicao);
+		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
 		listTokensDaLinha.push_back(tokensDaLinha);
 		contadorLinha++;
 	}
