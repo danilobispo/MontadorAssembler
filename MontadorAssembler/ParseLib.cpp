@@ -190,7 +190,7 @@ std::string ParseLib::removeComentarios(std::string arquivoConteudo) {
 			posicaoFinal++;
 		}
 
-		arquivoConteudo.erase(posicaoComentario, posicaoFinal);
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoComentario, arquivoConteudo.begin() + posicaoFinal);
 		posicaoComentario = arquivoConteudo.find(';');
 	}
 	return arquivoConteudo;
