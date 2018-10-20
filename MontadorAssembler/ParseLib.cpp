@@ -281,7 +281,7 @@ std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &arquivoCont
 	unique_copy(arquivoConteudo.begin(),
 		arquivoConteudo.end(),
 		std::back_insert_iterator<std::string>(output),
-		[](char a, char b) { return isspace(a) && isspace(b); });
+		[](char a, char b) { return isspace(static_cast<unsigned char>(a)) && isspace(static_cast<unsigned char>(b)); });
 
 	std::regex labelComPuloDeLinha("(.+:)(\n)");
 	output = std::regex_replace(output, labelComPuloDeLinha, "$1 ");
@@ -427,7 +427,6 @@ bool ParseLib::is_number(const std::string &s) {
 
 std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoConteudo) {
 	arquivoConteudo = removeComentarios(arquivoConteudo);
-	arquivoConteudo = removeCaracteresEspeciais(arquivoConteudo);
 	arquivoConteudo = removeTabulacoes(arquivoConteudo);
 	arquivoConteudo = removeEspacosEmBrancoExtras(arquivoConteudo);
 	setLinhasDoCodigo(this->separaEmLinhas(arquivoConteudo)); // TODO tirar essa redundancia de usar set e dps get
