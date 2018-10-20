@@ -1,9 +1,11 @@
 ;Co
 
 Y: EXTERN	;có é õ á é s ç 
-MOD_B: 
+
+MOD_B     : 
 EXTERN  ;co
 PUBLIC VAL
+
 PUBLIC L1
 SECTION TEXT
 INPUT Y

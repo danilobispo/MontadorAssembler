@@ -18,6 +18,7 @@ ParseLib::~ParseLib()
 {
 }
 
+// Retorna ou a label ou "" se nao houver
 std::string ParseLib::parseLabel(std::string linha) {
 	std::string label;
 	// Provavelmente a label virá no seguinte formato:
@@ -204,8 +205,7 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 	// Linhas com 3 tokens(COPY command ou LABEL + Operação)
 	// Linhas com 4 tokens(LABEL+COPY)
 	std::transform(linha.begin(), linha.end(), linha.begin(), ::tolower);
-	printLinha(linha);
-	linha = removeComentarios(linha);
+
 	// Separa os elementos da linha, para isso, usamos um parse para obter cada token da linha
 	// <Rótulo>: <Operação> <Operando>; <Comentários>
 	// <Rótulo>
@@ -293,17 +293,23 @@ std::string ParseLib::removeEspacosEmBrancoExtras(std::string arquivoConteudo) {
 	//remove espaços depois de \n
 	posicaoEspaco = arquivoConteudo.find("\n ");
 	while (posicaoEspaco != std::string::npos) {
-		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco+1);
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco + 1);
 		posicaoEspaco = arquivoConteudo.find("\n ");
 	}
 
-	std::regex labelComPuloDeLinha("(.+:)(\n)");
-	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComPuloDeLinha, "$1 ");
-	std::regex labelComLetraLogoAposDoisPontos("(.+:)(\\w)");
-	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComLetraLogoAposDoisPontos, "$1 $2");
+	//remove espaços antes de :
+	posicaoEspaco = arquivoConteudo.find(" :");
+	while (posicaoEspaco != std::string::npos) {
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
+		posicaoEspaco = arquivoConteudo.find(" :");
+	}
 
 	return arquivoConteudo;
 
+	/*std::regex labelComPuloDeLinha("(.+:)(\n)");
+	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComPuloDeLinha, "$1 ");
+	std::regex labelComLetraLogoAposDoisPontos("(.+:)(\\w)");
+	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComLetraLogoAposDoisPontos, "$1 $2");*/
 
 	//std::string output;
 	//output.clear();
@@ -405,8 +411,7 @@ void ParseLib::setArquivo(const std::string &arquivo) {
 }
 
 void ParseLib::printLinha(std::string linha) {
-	//    std::cout << "Linha atual: " << linha << std::endl;
-
+	    std::cout << "Linha atual: " << linha << std::endl;
 }
 
 bool ParseLib::isParsingMacro() const {
@@ -467,10 +472,7 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoCo
 	arquivoConteudo = removeEspacosEmBrancoExtras(arquivoConteudo);
 	arquivoConteudo = juntaLabelEOperacao(arquivoConteudo);
 	std::vector<std::string> codeLines = this->separaEmLinhas(arquivoConteudo);
-	for (auto& linha : codeLines) {
-		if (linha == "") {
-			codeLines.erase(std::remove(codeLines.begin(), codeLines.end(), linha), codeLines.end());
-		}
+	//for (auto& linha : codeLines) {
 		// Remoção dessa área do código pois operandos negativos como no CONST eram parseados incorretamente
 		/*else if (linha.find('+') != std::string::npos || linha.find('-') != std::string::npos) {
 			std::string::size_type i = 0;
@@ -497,16 +499,19 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoCo
 				i--;
 			}
 		}*/
-	}
+	//}
 	int contadorLinha = 1;
 	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
 	int contadorPosicao = 0;
 	setContadorPosicao(contadorPosicao);
+	codeLines.erase(remove(codeLines.begin(), codeLines.end(), ""), codeLines.end());
 	for (auto &codeLine : codeLines) {
-		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
-		listTokensDaLinha.push_back(tokensDaLinha);
-		contadorLinha++;
+			Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
+			listTokensDaLinha.push_back(tokensDaLinha);
+			contadorLinha++;
 	}
+
+
 	//DEBUG
 	for (auto &i : listTokensDaLinha) {
 		std::cout << "Label: " << i.label << std::endl;
