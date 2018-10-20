@@ -35,8 +35,9 @@ public:
 
 	void setLinhasDoCodigo(const std::vector<std::string> &linhasDoCodigo);
 	std::string removeCaracteresEspeciais(std::string str);
-	std::string removeEspacosEmBrancoExtras(const std::string &fileString);
+	std::string removeEspacosEmBrancoExtras(std::string fileString);
 	std::string removeTabulacoes(std::string linha);
+	std::string juntaLabelEOperacao(std::string arquivo);
 	std::vector<std::string> separaEmLinhas(std::string fileString);
 	std::string removeComentarios(std::string linha);
 	void preparaCodigo(std::string, const std::string &string, const std::string &basic_string);

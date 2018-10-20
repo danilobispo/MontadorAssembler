@@ -101,7 +101,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool temEnd = false;
 
 	for (unsigned int i = 0; i < tokensDoArquivo.size(); i++) {
-		std::string label = tokensDoArquivo[i].label; // #ver nao to entendo o que isso e as linhas de baixo fazem. como se sabe o que é label o que é operaçao...
+		std::string label = tokensDoArquivo[i].label;
 		std::string operacao = tokensDoArquivo[i].operacao;
 		std::vector<std::string> operando = tokensDoArquivo[i].operando;
 		int numeroDaLinha = tokensDoArquivo[i].numeroDaLinha;

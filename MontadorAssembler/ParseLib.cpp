@@ -274,21 +274,47 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 }
 
 
-std::string ParseLib::removeEspacosEmBrancoExtras(const std::string &arquivoConteudo) {
-	// Solução adaptada de https://stackoverflow.com/a/35302029
-	std::string output;
-	output.clear();
-	unique_copy(arquivoConteudo.begin(),
-		arquivoConteudo.end(),
-		std::back_insert_iterator<std::string>(output),
-		[](char a, char b) { return isspace(static_cast<unsigned char>(a)) && isspace(static_cast<unsigned char>(b)); });
+std::string ParseLib::removeEspacosEmBrancoExtras(std::string arquivoConteudo) {
+	
+	//remove duplos espaços
+	std::string::size_type posicaoEspaco = arquivoConteudo.find("  ");
+	while (posicaoEspaco != std::string::npos) {
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
+		posicaoEspaco = arquivoConteudo.find("  ");
+	}
+
+	//remove espaços antes de \n
+	posicaoEspaco = arquivoConteudo.find(" \n");
+	while (posicaoEspaco != std::string::npos) {
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
+		posicaoEspaco = arquivoConteudo.find(" \n");
+	}
+
+	//remove espaços depois de \n
+	posicaoEspaco = arquivoConteudo.find("\n ");
+	while (posicaoEspaco != std::string::npos) {
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco+1);
+		posicaoEspaco = arquivoConteudo.find("\n ");
+	}
 
 	std::regex labelComPuloDeLinha("(.+:)(\n)");
-	output = std::regex_replace(output, labelComPuloDeLinha, "$1 ");
+	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComPuloDeLinha, "$1 ");
 	std::regex labelComLetraLogoAposDoisPontos("(.+:)(\\w)");
-	output = std::regex_replace(output, labelComLetraLogoAposDoisPontos, "$1 $2");
+	arquivoConteudo = std::regex_replace(arquivoConteudo, labelComLetraLogoAposDoisPontos, "$1 $2");
 
-	return output;
+	return arquivoConteudo;
+
+
+	//std::string output;
+	//output.clear();
+	//unique_copy(arquivoConteudo.begin(),
+	//	arquivoConteudo.end(),
+	//	std::back_insert_iterator<std::string>(output),
+	//	[](char a, char b) { return isspace(static_cast<unsigned char>(a)) && isspace(static_cast<unsigned char>(b)); });
+
+	
+
+	//return output;
 }
 
 std::string ParseLib::removeTabulacoes(std::string fileString) {
@@ -297,6 +323,16 @@ std::string ParseLib::removeTabulacoes(std::string fileString) {
 	fileString = std::regex_replace(fileString, std::regex("\t"), " ");
 	// fileString.erase(std::remove(fileString.begin(), fileString.end(), '\t'), fileString.end());
 	return fileString;
+}
+
+std::string ParseLib::juntaLabelEOperacao(std::string arquivo)
+{
+	std::string::size_type posicao = arquivo.find(":\n");
+	while (posicao != std::string::npos) {
+		arquivo[posicao + 1] = ' ';
+		posicao = arquivo.find(":\n");
+	}
+	return arquivo;
 }
 
 std::vector<std::string> ParseLib::separaEmLinhas(std::string fileString) {
@@ -429,8 +465,8 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoCo
 	arquivoConteudo = removeComentarios(arquivoConteudo);
 	arquivoConteudo = removeTabulacoes(arquivoConteudo);
 	arquivoConteudo = removeEspacosEmBrancoExtras(arquivoConteudo);
-	setLinhasDoCodigo(this->separaEmLinhas(arquivoConteudo)); // TODO tirar essa redundancia de usar set e dps get
-	std::vector<std::string> codeLines = getLinhasDoCodigo();
+	arquivoConteudo = juntaLabelEOperacao(arquivoConteudo);
+	std::vector<std::string> codeLines = this->separaEmLinhas(arquivoConteudo);
 	for (auto& linha : codeLines) {
 		if (linha == "") {
 			codeLines.erase(std::remove(codeLines.begin(), codeLines.end(), linha), codeLines.end());
