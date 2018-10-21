@@ -1,7 +1,10 @@
 ;Co
 
 
+IF 0
 Y: EXTERN	;có é õ á é s ç 
+
+MAT: EQU 0
 
 MOD_B     : 
 EXTERN  ;co
@@ -13,7 +16,7 @@ INPUT Y
 ROT2:
 
 	LOAD VAL
-MAT: EQU 6
+
 ADD Y; loko demais
 STORE Y+2
 JMPP MOD_B

@@ -11,7 +11,7 @@
 #include <sstream>
 #include <cctype>
 
-PreProcessamento::PreProcessamento(const std::vector<Montador::TokensDaLinha> &tokensDaLinhaList) : tokensDaLinhaList(
+PreProcessamento::PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDaLinhaList) : tokensDaLinhaList(
 	tokensDaLinhaList) {
 
 	bool entrouEmText = false;
@@ -37,6 +37,37 @@ PreProcessamento::PreProcessamento(const std::vector<Montador::TokensDaLinha> &t
 		}
 	}
 
+
+
+	for (int i = 0; i < tokensDaLinhaList.size(); i++) {
+		if (tokensDaLinhaList[i].operacao == "if") {
+			TabelaLib tabelaLib;
+			bool ehSimbolo = tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(tokensDaLinhaList[i].operando[0]);
+			bool apagaProximaLinha = false;
+			if (ehSimbolo) {
+				//InfoDeSimbolo(-1, -1, true, converteStringParaInt(tokensDaLinha.operando[0]), false);
+				InfoDeSimbolo infoDeSimbolo = tabelaLib.obtemSimboloNaTabelaDeSimbolos(tokensDaLinhaList[i].operando[0]);
+				if (infoDeSimbolo.valorConstante != 0) {
+					apagaProximaLinha = false;
+				}
+				else {
+					apagaProximaLinha = true;
+				}
+			}
+			else if (isOperandoNumero(tokensDaLinhaList[i].operando[0])) {
+				std::string::size_type tamanhoTokenList = tokensDaLinhaList.size();
+				if (i == tamanhoTokenList) { //Nada a ser feito, tamanho da lista é igual ao indice(ultima linha)
+					apagaProximaLinha = false;
+				}
+				else {
+					apagaProximaLinha = true;
+				}				
+			}
+			if (apagaProximaLinha) {
+				tokensDaLinhaList.erase(tokensDaLinhaList.begin() + i);
+			}
+		}
+	}
 }
 
 const std::vector<Montador::TokensDaLinha> &PreProcessamento::getTokensDaLinhaList() const {
@@ -115,7 +146,7 @@ void PreProcessamento::montarCodigo(std::string nomeArquivoSaida) {
 	primeiraPassagem(tokensDaLinha, 2);
 }
 
-void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDoArquivo, int numeroDeArquivos) {
+void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinhaList, int numeroDeArquivos) {
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
@@ -125,11 +156,12 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool temBegin = false;
 	bool temEnd = false;
 
-	for (unsigned int i = 0; i < tokensDoArquivo.size(); i++) {
-		std::string label = tokensDoArquivo[i].label;
-		std::string operacao = tokensDoArquivo[i].operacao;
-		std::vector<std::string> operando = tokensDoArquivo[i].operando;
-		int numeroDaLinha = tokensDoArquivo[i].numeroDaLinha;
+
+	for (unsigned int i = 0; i < tokensDaLinhaList.size(); i++) {
+		std::string label = tokensDaLinhaList[i].label;
+		std::string operacao = tokensDaLinhaList[i].operacao;
+		std::vector<std::string> operando = tokensDaLinhaList[i].operando;
+		int numeroDaLinha = tokensDaLinhaList[i].numeroDaLinha;
 		std::string::size_type numeroDeOperandos = operando.size();
 		InfoDeInstrucoes infoDeInstrucoes;
 		InfoDeDiretivas infoDeDiretivas;

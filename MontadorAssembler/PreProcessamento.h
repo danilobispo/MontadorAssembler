@@ -6,7 +6,7 @@
 
 class PreProcessamento {
 public:
-	PreProcessamento(const std::vector<Montador::TokensDaLinha> &tokensDaLinhaList);
+	PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDaLinhaList);
 
 private:
 	std::vector<Montador::TokensDaLinha> tokensDaLinhaList;
