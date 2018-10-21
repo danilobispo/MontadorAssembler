@@ -210,25 +210,16 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 	// <Rótulo>
 	// Para obtermos a label, executamos o método parseLabel, que retorna uma string com a label ou uma string vazia
 	// quando não temos a label na linha
-	std::string labelLinha = parseLabel(linha);
-	//TODO: Realocar essa parte do método em outro lugar
-	//    if (!labelLinha.empty()) {
-	//        // Se a label não for vazia, precisamos adiciona-la na tabela de símbolos
-	//        // Mas antes, devemos checar se o simbolo já não existe
-	//        if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(labelLinha)) {
-	//            ErrorLib errorLib(linhaContador, "Redefinição: Rótulo já inexistente na tabela de símbolos", "Léxico");
-	//        } else {
-	//            tabelaLib.insereSimboloNaTabelaDeSimbolos(labelLinha, InfoDeSimbolo(-1,-1,false,-1));
-	//        }
-	//    }
+	std::string label = parseLabel(linha);
+
 	// <Operação>
 	// Para obtermos a operação, simplesmente precisamos verificar se uma label foi declarada, caso não tenha sido, o
 	// primeiro elemento daquela linha será a operação
-	std::string labelOperacao = parseOperacao(linha, !labelLinha.empty());
-	std::vector<std::string> labelOperandos;
+	std::string operacao = parseOperacao(linha, !label.empty());
+	std::vector<std::string> operandos;
 
-	if (tabelaLib.isDiretiva(labelOperacao)) {
-		InfoDeDiretivas infoDeDiretivas = tabelaLib.getDiretiva(labelOperacao);
+	if (tabelaLib.isDiretiva(operacao)) {
+		InfoDeDiretivas infoDeDiretivas = tabelaLib.getDiretiva(operacao);
 		// DEBUG Diretiva
 		//        std::cout << "infos de diretiva: " << std::endl;
 		//        std::cout << "diretiva: " << infoDeDiretivas.diretivasKey << std::endl;
@@ -236,9 +227,9 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 		//        std::cout << "tamanho: " << infoDeDiretivas.tamanho << std::endl ;
 		//        std::cout << "isPre: " << infoDeDiretivas.isPre << std::endl << std::endl;
 
-		labelOperandos = parseOperando(linha, infoDeDiretivas.numeroDeOperandos, !labelLinha.empty());
+		operandos = parseOperando(linha, infoDeDiretivas.numeroDeOperandos, !label.empty());
 		// DEBUG Operando
-		for (auto &labelOperando : labelOperandos) {
+		for (auto &labelOperando : operandos) {
 			//            std::cout << "Operando: " << labelOperando << std::endl;
 		}
 		if (infoDeDiretivas.tamanho == -1) {
@@ -246,30 +237,24 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 		//  TODO: Realocar essa parte do método em outro lugar
 		//        setContadorPosicao(contadorPosicao + infoDeDiretivas.tamanho);
 	}
-	else if (tabelaLib.isInstrucao(labelOperacao)) {
-		InfoDeInstrucoes infoDeInstrucoes = tabelaLib.getInstrucao(labelOperacao);
+	else if (tabelaLib.isInstrucao(operacao)) {
+		InfoDeInstrucoes infoDeInstrucoes = tabelaLib.getInstrucao(operacao);
 		// DEBUG Instrução
 		//        std::cout << "Infos de instrucao: " << std::endl;
 		//        std::cout << "Instrucao: " << infoDeInstrucoes.opcodesInstrucoes << std::endl;
 		//        std::cout << "Numero de operandos: " << infoDeInstrucoes.numeroDeOperandos << std::endl;
 		//        std::cout << "Tamanho: " << infoDeInstrucoes.tamanho << std::endl << std::endl;
-		labelOperandos = parseOperando(linha, infoDeInstrucoes.numeroDeOperandos, !labelLinha.empty());
+		operandos = parseOperando(linha, infoDeInstrucoes.numeroDeOperandos, !label.empty());
 		// DEBUG Operando
-		for (auto &labelOperando : labelOperandos) {
+		for (auto &labelOperando : operandos) {
 			//            std::cout << "Operando: " << labelOperando << std::endl;
 		}
 		//        setContadorPosicao(contadorPosicao + infoDeInstrucoes.tamanho);
 	}
 	else {
-		// Caso que o operando é um label declarado anteriormente, como aqui só fazemos a referência linha a linha, não
-		// temos como guardar as labels já declaradas, então vamos assumir apenas que é uma macro e que tem operandos
-		labelOperandos = parseOperando(linha, -1, !labelLinha.empty());
+		ErrorLib errorLib(linhaContador, "Operação inexistente", "Léxico");
 	}
-	//    TODO: Fazer checagem de operação em outro momento
-	//    else {
-	//        ErrorLib errorLib(linhaContador, "Operação inexistente", "Léxico");
-	//    }
-	return Montador::TokensDaLinha(labelLinha, labelOperacao, labelOperandos, linhaContador);
+	return Montador::TokensDaLinha(label, operacao, operandos, linhaContador);
 }
 
 
@@ -280,6 +265,25 @@ std::string ParseLib::removeEspacosEmBrancoExtras(std::string arquivoConteudo) {
 	while (posicaoEspaco != std::string::npos) {
 		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
 		posicaoEspaco = arquivoConteudo.find("  ");
+	}
+
+	//remove duplos pulos de linha
+	posicaoEspaco = arquivoConteudo.find("\n\n");
+	while (posicaoEspaco != std::string::npos) {
+		arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
+		posicaoEspaco = arquivoConteudo.find("\n\n");
+	}
+
+	////remove duplos pulos no final do arquivo
+	//posicaoEspaco = arquivoConteudo.find("\n" + EOF);
+	//while (posicaoEspaco != std::string::npos) {
+	//	arquivoConteudo.erase(arquivoConteudo.begin() + posicaoEspaco);
+	//	posicaoEspaco = arquivoConteudo.find("\n" + EOF);
+	//}
+
+	//remove duplos pulos no inicio do arquivo
+	while (arquivoConteudo[0] == '\n') {
+		arquivoConteudo.erase(arquivoConteudo.begin());
 	}
 
 	//remove espaços antes de \n

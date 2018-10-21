@@ -64,7 +64,7 @@ InfoDeInstrucoes TabelaLib::getInstrucao(std::string operacao) {
 bool TabelaLib::isInstrucao(std::string operacao) {
 	for (auto i : TabelaLib::TabelaDeInstrucoes) {
 		if (operacao == i.first) {
-			return i.first == operacao;
+			return true;
 		}
 	}
 	return false;

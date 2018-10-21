@@ -70,7 +70,7 @@ struct InfoDeUso {
 
 struct InfoDeSimbolo {
 	int endereco; // -1 significa endereço indefinido
-	int espaco; // -1 significa espaço indefinido
+	int espaco; // -1 significa tamanho indefinido (usado no space)
 
 	bool isConstante; // para saber se o Simbolo é uma constante
 	int valorConstante; // Talvez não seja necessário, já que o .o não faz cálculos com o valor absoluto da constante

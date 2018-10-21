@@ -12,7 +12,32 @@
 #include <cctype>
 
 PreProcessamento::PreProcessamento(const std::vector<Montador::TokensDaLinha> &tokensDaLinhaList) : tokensDaLinhaList(
-	tokensDaLinhaList) {}
+	tokensDaLinhaList) {
+
+	bool entrouEmText = false;
+	for (auto &tokensDaLinha : tokensDaLinhaList) {
+		if (tokensDaLinha.operacao == "section" && tokensDaLinha.operando[0] == "text") {
+			entrouEmText = true;
+		}
+		if (tokensDaLinha.operacao == "equ") {
+			if (!entrouEmText) {
+				TabelaLib tabelaLib;
+				
+				if (!tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(tokensDaLinha.label)) {
+					tabelaLib.insereSimboloNaTabelaDeSimbolos(tokensDaLinha.label, 
+						InfoDeSimbolo(-1, -1, true, converteStringParaInt(tokensDaLinha.operando[0]), false));
+				}
+				else {
+					ErrorLib erro(0, "Simbolo \""+ tokensDaLinha.label +"\" ja definido", "Semântico"); //TODO colocar a linha correta
+				}
+			}
+			else {
+				ErrorLib erro(0, "A diretiva EQU deve ser definida antes de SECTION TEXT", "Semântico");//TODO colocar a linha correta
+			}
+		}
+	}
+
+}
 
 const std::vector<Montador::TokensDaLinha> &PreProcessamento::getTokensDaLinhaList() const {
 	return tokensDaLinhaList;
