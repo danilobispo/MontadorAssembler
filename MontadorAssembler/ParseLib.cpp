@@ -87,7 +87,7 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 										   //Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
 			std::string op1, op2;
 			op1 = tokensLinhas[2].substr(0, tokensLinhas[2].find(','));
-			op2 = tokensLinhas[2].substr(tokensLinhas[2].find(',') + 1, tokensLinhas[2].size());
+			op2 = tokensLinhas[3].substr(0, tokensLinhas[3].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
@@ -130,15 +130,17 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 			operandosString.push_back(tokensLinhas[1]);
 		}
 		else if (numeroDeOperandos == 2) { // Caso do COPY
-										   //Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
+										   //Os dois estão juntos e separados por uma vírgula COM espaço, logo é só fazer uma substr para cada operando
 			std::string op1, op2;
 			std::string::size_type virgulaPos = tokensLinhas[1].find(',');
-			if (tokensLinhas[virgulaPos + 1] == " ") {
-				ErrorLib errorLib(contadorLinha, "Operandos de COPY estão separados com uma vírgula com espaço!",
+			op1 = tokensLinhas[1].substr(0, virgulaPos);
+			op2 = tokensLinhas[2].substr(0, tokensLinhas[2].size());
+			
+			if (linha.find(", ") == std::string::npos) {
+				ErrorLib errorLib(contadorLinha, "Operandos de COPY não estão separados com uma vírgula com espaço!",
 					"Léxico");
 			}
-			op1 = tokensLinhas[1].substr(0, tokensLinhas[1].find(','));
-			op2 = tokensLinhas[1].substr(tokensLinhas[1].find(',') + 1, tokensLinhas[1].size());
+			
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}

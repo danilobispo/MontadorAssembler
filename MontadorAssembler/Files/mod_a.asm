@@ -15,6 +15,6 @@ ADD Y; loko demais
 STORE Y+2
 JMPP MOD_B
 L1: STOP
-COPY A, B
+L3: COPY Aaaa, Beeech
 SECTION DATA
 VAL: CONST 0x5
