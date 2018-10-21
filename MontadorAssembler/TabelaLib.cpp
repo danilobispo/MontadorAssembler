@@ -32,7 +32,10 @@ std::map<std::string, InfoDeDiretivas> TabelaLib::TabelaDeDiretivas{
 { "public",{ 1,0, PUBLIC, bool(false)} },
 { "extern", {0,0, EXTERN, bool(false)} },
 { "begin",{ 0,0, BEGIN, bool(false) } },
-{ "end",{ 0,0, END, bool(false) } }
+{ "end",{ 0,0, END, bool(false) } },
+{ "if", {1, 0, IF, bool(true) } },
+{ "equ", {1, 0, EQU, bool(true) } } 
+
 };
 
 std::map<std::string, InfoDeSimbolo> TabelaLib::TabelaDeSimbolos;
@@ -44,7 +47,7 @@ bool TabelaLib::isDiretiva(std::string operacao) {
 	// Obtém os valores da lista de diretiva e verifica pelo valor da key se é uma diretiva
 	for (auto i : TabelaLib::TabelaDeDiretivas) {
 		if (i.first == operacao) {
-			return i.first == operacao;
+			return true;
 		};
 	}
 	return false;

@@ -40,7 +40,9 @@ enum diretivas {
 	BEGIN,
 	END,
 	PUBLIC,
-	EXTERN
+	EXTERN,
+	IF,
+	EQU
 };
 
 struct InfoDeInstrucoes {

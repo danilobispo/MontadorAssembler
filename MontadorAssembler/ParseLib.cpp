@@ -59,6 +59,7 @@ std::string ParseLib::parseOperacao(std::string linha, bool hasLabel) {
 	}
 }
 
+//TODO: Verificar contador de linha
 std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDeOperandos, bool hasLabel) {
 	// Um operando vem logo após a operação, mas se a linha tiver label, a posição do operando pode mudar, logo passamos
 	// isso como parâmetro também
@@ -76,95 +77,91 @@ std::vector<std::string> ParseLib::parseOperando(std::string linha, int numeroDe
 
 	if (hasLabel) {
 		if (numeroDeOperandos == 0) { // Caso de algumas diretivas
-			if (operandosString.size() > 2) {
-				ErrorLib errorLib(contadorLinha, "Número incorreto de operandos!", "Sintático");
+			// Nada a ser feito
+			if (tokensLinhas.size() != 2) {
+				// TODO: Colocar número correto da linha
+				ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
 			}
 		}
 		else if (numeroDeOperandos == 1) { // Todos os outros
+			if (tokensLinhas.size() != 3) {
+				// TODO: Colocar número correto da linha
+				ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
+			}
 			operandosString.push_back(tokensLinhas[2]);
 		}
 		else if (numeroDeOperandos == 2) { // Caso do COPY
-										   //Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
+			if (linha.find(", ") == std::string::npos) {
+				ErrorLib errorLib(contadorLinha, "Operandos de COPY não estão separados com uma vírgula com espaço!",
+					"Léxico");
+			}
+			// Os dois estão juntos e separados por uma vírgula, logo é só fazer uma substr para cada operando
+			if (tokensLinhas.size() != 4) {
+				// TODO: Colocar número correto da linha
+				ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
+			}
 			std::string op1, op2;
 			op1 = tokensLinhas[2].substr(0, tokensLinhas[2].find(','));
 			op2 = tokensLinhas[3].substr(0, tokensLinhas[3].size());
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
-		else if (numeroDeOperandos == -1) { // Caso do SPACE e MACRO
-											// Macro obrigatoriamente tem uma label antes, para identificá-la
-											// Faremos uma iteração pela string que pegará o número de parâmetros separados por vírgula
-											// Para diferenciar, precisaremos pegar o nome da operação, que aqui está, invariavelmente,
-											// em tokensLinhas[1].
+		else if (numeroDeOperandos == -1) { // Caso do SPACE 
 			std::string operacao = tokensLinhas[1];
-			if (operacao == "macro") {
-				// Os operandos começam(se existirem) a partir do tokensLinhas[2], e estão separados por vírgula e espaço
-				std::string::size_type tamanho = tokensLinhas.size();
-				if (tamanho > 2) {
-					for (unsigned int it = 2; it < tamanho; it++) {
-						std::string::size_type posicaoVirgula = tokensLinhas[it].find(',');
-						if (posicaoVirgula != std::string::npos) {
-							std::string operandoSemVirgula = tokensLinhas[it].substr(0, posicaoVirgula);
-							operandosString.push_back(operandoSemVirgula);
-						}
-						else {
-							operandosString.push_back(tokensLinhas[it]);
-						}
-					}
-				}
-			}
 			if (operacao == "space") {
 				if (tokensLinhas.size() == 3) {
-					operandosString.push_back(tokensLinhas[2]);
+					operandosString.push_back(tokensLinhas[2]); // Se tiver valor, o valor a frente é o espaço
 				}
-				else { operandosString.push_back("1"); }
+				else if(tokensLinhas.size() == 2) { 
+					operandosString.push_back("1"); // Se não tiver, consideramos que o operando é 1
+				}
+				else {
+					// TODO: Colocar número correto da linha
+					ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
+				}
 			}
 		}
 		// Caso sem label, tokens relativos diminuem em uma posição no vetor
 	}
 	else {
 		if (numeroDeOperandos == 0) { // Caso de algumas diretivas
-
+			// Nada a ser feito
 		}
 		else if (numeroDeOperandos == 1) { // Todos os outros
 			operandosString.push_back(tokensLinhas[1]);
+			if (tokensLinhas.size() != 2) {
+				// TODO: Colocar número correto da linha
+				ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
+			}
 		}
 		else if (numeroDeOperandos == 2) { // Caso do COPY
-										   //Os dois estão juntos e separados por uma vírgula COM espaço, logo é só fazer uma substr para cada operando
+			if (linha.find(", ") == std::string::npos) {
+				ErrorLib errorLib(contadorLinha, "Operandos de COPY não estão separados com uma vírgula com espaço!",
+					"Léxico");
+			}
+			if (tokensLinhas.size() != 3) {
+				// TODO: Colocar número correto da linha
+				ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
+			}
+			//Os dois estão juntos e separados por uma vírgula COM espaço, logo é só fazer uma substr para cada operando
 			std::string op1, op2;
 			std::string::size_type virgulaPos = tokensLinhas[1].find(',');
 			op1 = tokensLinhas[1].substr(0, virgulaPos);
 			op2 = tokensLinhas[2].substr(0, tokensLinhas[2].size());
 			
-			if (linha.find(", ") == std::string::npos) {
-				ErrorLib errorLib(contadorLinha, "Operandos de COPY não estão separados com uma vírgula com espaço!",
-					"Léxico");
-			}
-			
 			operandosString.push_back(op1);
 			operandosString.push_back(op2);
 		}
-		else if (numeroDeOperandos == -1) { // Caso do SPACE e chamada de macro
+		else if (numeroDeOperandos == -1) { // Caso do SPACE 
 			std::string operacao = tokensLinhas[0];
 			int tamanho = tokensLinhas.size();
 			if (operacao == "space") {
 				if (tokensLinhas.size() == 2) {
-					operandosString.push_back(tokensLinhas[1]);
+					operandosString.push_back(tokensLinhas[1]); 
 				}
-				else { operandosString.push_back("1"); }
-			}
-			else { // Chamada de macros
-				if (tamanho > 1) {
-					for (int it = 1; it < tamanho; it++) {
-						std::string::size_type posicaoVirgula = tokensLinhas[it].find(',');
-						if (posicaoVirgula != std::string::npos) {
-							std::string operandoSemVirgula = tokensLinhas[it].substr(0, posicaoVirgula);
-							operandosString.push_back(operandoSemVirgula);
-						}
-						else {
-							operandosString.push_back(tokensLinhas[it]);
-						}
-					}
+				else if(tokensLinhas.size() == 1) { operandosString.push_back("1"); }
+				else {
+					ErrorLib errorLib = ErrorLib(contadorLinha, "Numero de operandos invalido!", "Sintatico");
 				}
 			}
 		}
@@ -199,13 +196,13 @@ std::string ParseLib::removeComentarios(std::string arquivoConteudo) {
 	return arquivoConteudo;
 }
 
+// Faz a separação dos tokens de uma linha, podemos ter 3 opções:
+// Linhas com um token(END, STOP)
+// Linhas com 3 tokens(COPY command ou LABEL + Operação)
+// Linhas com 4 tokens(LABEL+COPY)
 Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContador) {
 	TabelaLib tabelaLib;
-
-	// Faz a separação dos tokens de uma linha, podemos ter 3 opções:
-	// Linhas com um token(END, STOP)
-	// Linhas com 3 tokens(COPY command ou LABEL + Operação)
-	// Linhas com 4 tokens(LABEL+COPY)
+	// Transforma em lowercase
 	std::transform(linha.begin(), linha.end(), linha.begin(), ::tolower);
 
 	// Separa os elementos da linha, para isso, usamos um parse para obter cada token da linha
