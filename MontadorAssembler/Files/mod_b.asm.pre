@@ -1,0 +1,13 @@
+mod_b: begin 
+val: extern 
+l1: extern 
+public y
+public mod_b
+section text
+output y
+output val
+output y+2
+jmp l1
+section bss
+y: space 3
+end 

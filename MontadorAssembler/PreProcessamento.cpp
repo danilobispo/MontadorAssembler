@@ -467,7 +467,7 @@ void PreProcessamento::escreveCodigoNoArquivoDeSaida(std::string nomeDoArquivo, 
 {
 	std::ofstream arquivoDeSaida;
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
-	arquivoDeSaida << codigo << "\n";
+	arquivoDeSaida << codigo;
 	arquivoDeSaida.close();
 }
 
@@ -680,8 +680,10 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 	}
 	showTabelaDeUso();
 	showMapaDeBits(mapaDeBits);
-	arquivoDeSaida.close();	// para indicarmos o início para a Tabela de Definições
+	arquivoDeSaida.close();
 	if (isArquivoModulo) {
+		showTabelaDeUso();
+		showMapaDeBits(mapaDeBits);
 		escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
 		escreveTabelaDeUsoNoArquivoDeSaida(nomeDoArquivo + ".o");
 		escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
