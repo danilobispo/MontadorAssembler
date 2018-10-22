@@ -412,6 +412,7 @@ void PreProcessamento::escreveTabelaDeDefinicoesNoArquivoDeSaida(std::string nom
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
 
 	TabelaLib tabelaLib;
+	arquivoDeSaida << "TABLE DEFINITION\n";
 	std::map<std::string, InfoDeDefinicao> tabelaDeDefinicoes = tabelaLib.getTabelaDeDefinicoes();
 	for (auto &itemDeUso : tabelaDeDefinicoes) {
 		arquivoDeSaida << "D,";
@@ -427,6 +428,7 @@ void PreProcessamento::escreveTabelaDeUsoNoArquivoDeSaida(std::string nomeDoArqu
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
 
 	TabelaLib tabelaLib;
+	arquivoDeSaida << "TABLE USE\n";
 	std::map<std::string, InfoDeUso> tabelaDeUso = tabelaLib.getTabelaDeUso();
 	for (auto &itemDeUso : tabelaDeUso) {
 		for (unsigned int i = 0; i < itemDeUso.second.valorList.size(); i++) {
@@ -442,10 +444,13 @@ void PreProcessamento::escreveMapaDeBitsNoArquivoDeSaida(std::string nomeDoArqui
 {
 	std::ofstream arquivoDeSaida;
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+
+	arquivoDeSaida << "RELATIVE\n";
 	arquivoDeSaida << "R:";
 	for (auto &bit : mapaDeBits) {
 		arquivoDeSaida << bit;
 	}
+	arquivoDeSaida << "\n";
 	arquivoDeSaida.close();
 }
 
@@ -454,6 +459,15 @@ void PreProcessamento::escreveTamanhoDoCodigoNoArquivoDeSaida(std::string nomeDo
 	std::ofstream arquivoDeSaida;
 	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
 	arquivoDeSaida << "S:" << tamanho << "\n";
+	arquivoDeSaida.close();
+}
+
+
+void PreProcessamento::escreveCodigoNoArquivoDeSaida(std::string nomeDoArquivo, std::string codigo)
+{
+	std::ofstream arquivoDeSaida;
+	arquivoDeSaida.open(nomeDoArquivo, std::ios::app);
+	arquivoDeSaida << codigo << "\n";
 	arquivoDeSaida.close();
 }
 
@@ -492,11 +506,10 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 	int enderecoOperando;
 	std::vector<int> mapaDeBits;
 	std::ofstream arquivoDeSaida(nomeDoArquivo + ".o");
-	std::string códigoSaida;
+	std::stringstream codeSaida;
 
 	if (isArquivoModulo) {
-		arquivoDeSaida << nomeDoArquivo << ":" << "\n";
-		arquivoDeSaida << "C:";
+		codeSaida << "CODE\n";
 	}
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
@@ -613,19 +626,19 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 				// Escrita do código-fonte 
 				if (numeroDeOperandos > 0) {
 					if (j != 1) {
-						arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+						codeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 					}
 					if (!isOperandoNumero(operando[j])) {
 						if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(operando[j]) && tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
-							arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+							codeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
 							mapaDeBits.push_back(0);
 						}
 						else if (!tabelaLib.rotuloJaExistenteNaTabelaDeDefinicoes(operando[j])) {
 							if (tem2Operandos) {
-								arquivoDeSaida << valor << " ";
+								codeSaida << valor << " ";
 							}
 							else {
-								arquivoDeSaida << 0 << " ";
+								codeSaida << 0 << " ";
 							}
 
 							mapaDeBits.push_back(1);
@@ -633,19 +646,19 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 					}
 					else {
 						valor = converteStringParaInt(operando[j]);
-						arquivoDeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
+						codeSaida << tabelaLib.obtemSimboloNaTabelaDeSimbolos(operando[j]).endereco + valor << " ";
 						mapaDeBits.push_back(0);
 					}
 				}
 			}
 			if (numeroDeOperandos == 0) { // Caso do STOP
-				arquivoDeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
+				codeSaida << infoDeInstrucoes.opcodesInstrucoes << " ";
 			}
 		}
 		else if (tabelaLib.isDiretiva(operacao) &&
 			tabelaLib.getDiretiva(operacao).diretivasKey == 2) { // CONST
 			tamanhoCodigo++;
-			arquivoDeSaida << operando[0] << " ";
+			codeSaida << operando[0] << " ";
 			mapaDeBits.push_back(0);
 		}
 		else if (tabelaLib.isDiretiva(operacao) &&
@@ -654,12 +667,12 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 				int numero = converteStringParaInt(operando[0]);
 				tamanhoCodigo += numero;
 				for (int i = 0; i < numero; i++) {
-					arquivoDeSaida << "00" << " ";
+					codeSaida << "00" << " ";
 					mapaDeBits.push_back(0);
 				}
 			}
 			else {
-				arquivoDeSaida << "00" << " ";
+				codeSaida << "00" << " ";
 				mapaDeBits.push_back(0);
 				tamanhoCodigo++;
 			}
@@ -667,7 +680,6 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 	}
 	showTabelaDeUso();
 	showMapaDeBits(mapaDeBits);
-	arquivoDeSaida << "\n"; // Escreve um pulo de linha ao final do arquivo 
 	arquivoDeSaida.close();	// para indicarmos o início para a Tabela de Definições
 	if (isArquivoModulo) {
 		escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
@@ -675,6 +687,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 		escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
 		escreveMapaDeBitsNoArquivoDeSaida((nomeDoArquivo + ".o"), mapaDeBits);
 	}
+	escreveCodigoNoArquivoDeSaida(nomeDoArquivo + ".o", codeSaida.str());
 	
 }
 

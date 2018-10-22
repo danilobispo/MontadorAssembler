@@ -37,6 +37,7 @@ public:
 	void escreveTabelaDeUsoNoArquivoDeSaida(std::string nomeDoArquivo);
 	void escreveMapaDeBitsNoArquivoDeSaida(std::string nomeDoArquivo, std::vector<int> mapaDeBits);
 	void escreveTamanhoDoCodigoNoArquivoDeSaida(std::string nomeDoArquivo, int tamanho);
+	void escreveCodigoNoArquivoDeSaida(std::string nomeDoArquivo, std::string codigo);
 	void showTabelaDeUso();
 	void showMapaDeBits(std::vector<int>);
 	void showCodigo();
