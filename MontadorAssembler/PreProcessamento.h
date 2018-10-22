@@ -29,8 +29,8 @@ public:
 
 	// TODO: Se der tempo, mover isso para montador
 	void montarCodigo();
-	void primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos);
-	void segundaPassagem(std::string nomeArquivoSaida);
+	bool primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha);
+	void segundaPassagem(std::string nomeArquivoSaida, bool isArquivoModulo);
 	void showTabelaDeSimbolos();
 	void showTabelaDeDefinicoes();
 	void escreveTabelaDeDefinicoesNoArquivoDeSaida(std::string nomeDoArquivo);

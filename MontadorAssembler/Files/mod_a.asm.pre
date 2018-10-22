@@ -1,7 +1,4 @@
-y: extern 
-mod_b: extern 
-public val
-public l1
+mod_a: begin 
 section text
 input y
 rot2: load val
@@ -14,3 +11,4 @@ section data
 val1: const 25
 section bss
 val: space 1
+end 

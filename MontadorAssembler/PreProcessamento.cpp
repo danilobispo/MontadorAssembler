@@ -167,21 +167,38 @@ std::vector<Montador::TokensDaLinha> PreProcessamento::redefineVariaveisDeMacro(
 */
 void PreProcessamento::montarCodigo(std::string nomeArquivoSaida) {
 	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
-	primeiraPassagem(tokensDaLinha, 2);
+	primeiraPassagem(tokensDaLinha);
 }
 
-void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos) {
+bool PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha) {
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
 	bool isSectionText = false;
 	bool isSectionData = false;
 	bool isSectionBss = false;
-	bool checaBeginEEnd = numeroDeArquivos == 2 ? true : false;
+
+
+	bool isArquivoModulo = false;
 	bool temBegin = false;
 	bool temEnd = false;
 
+
 	tokensDaLinhaList = getTokensDaLinhaList();
+
+	for (auto &tokenDaLinha : tokensDaLinhaList) {
+		if (tokenDaLinha.operacao == "begin") {
+			isArquivoModulo = true;
+			temBegin = true;
+		}
+		if (tokenDaLinha.operacao == "end") {
+			isArquivoModulo = true;
+			if (!temBegin) {
+				ErrorLib errorLib = ErrorLib(tokenDaLinha.numeroDaLinha, "Diretiva END antes de diretiva BEGIN", "Sintatico");
+			}
+		}
+	}
+	
 
 	for (unsigned int i = 0; i < tokensDaLinhaList.size(); i++) {
 		std::string label = tokensDaLinhaList[i].label;
@@ -277,25 +294,29 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 							InfoDeSimbolo(contadorPosicao, 1, true, constVal, false));
 					}
 				}
-				else { ErrorLib errorLib(contadorLinha, "Instrução fora da section correta", "Léxico"); }
+				else { ErrorLib errorLib(contadorLinha, "Instrucao fora da section correta", "Lexico"); }
 			}
 			else if (operacao == "begin") {
-				if (!checaBeginEEnd) {
+				/*if (!checaBeginEEnd) {
 					ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
-				else {
-					temBegin = true;
-				}
+				else {*/
+				temBegin = true;
+				//}
 			}
 			else if (operacao == "end") {
-				if (!checaBeginEEnd) {
+				/*if (!checaBeginEEnd) {
 					ErrorLib errorLib(contadorLinha, "Diretiva begin ou end presente em montagem de apenas um arquivo", "Restrição");
 				}
-				else {
-					temEnd = true;
-				}
+				else {*/
+				temEnd = true;
+				//}
 			}
 			else if (operacao == "public") {
+				if (!isArquivoModulo) {
+					ErrorLib(contadorLinha, "Diretiva PUBLIC em programa que nao e modulo", "Semantico");
+				}
+
 				// Obtém a label, adiciona na tabela de símbolos com o valor
 				// Na primeira passagem:
 				// Quando a diretiva PUBLIC é encontrada, insere o respectivo operando na Tabela de
@@ -314,6 +335,9 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				}
 			}
 			else if (operacao == "extern") {
+				if (!isArquivoModulo) {
+					ErrorLib(contadorLinha, "Diretiva EXTERN em programa que nao e modulo", "Semantico");
+				}
 				// Quando a diretiva EXTERN é encontrada, insere o respectivo rótulo na TS com
 				// valor “zero absoluto” e a indicacao de símbolo externo;
 				if (tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(label)) {
@@ -325,7 +349,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 			}
 		}
 		else {
-			ErrorLib errorLib(contadorLinha, "Operação não identificada!", "Léxico");
+			ErrorLib errorLib(contadorLinha, "Operacao nao identificada!", "Lexico");
 		}
 		contadorLinha++;
 	}
@@ -333,7 +357,10 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	//    std::cout << "Fim da primeira passagem!" << std::endl;
 
 	showTabelaDeSimbolos();
-	showTabelaDeDefinicoes();
+	if (!isArquivoModulo) {
+		showTabelaDeDefinicoes();
+	}
+	return isArquivoModulo;
 }
 
 bool PreProcessamento::isOperandoNumero(std::string operando) {
@@ -454,7 +481,7 @@ void PreProcessamento::showMapaDeBits(std::vector<int> vetor)
 }
 
 
-void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
+void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivoModulo) {
 	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
@@ -465,8 +492,12 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 	int enderecoOperando;
 	std::vector<int> mapaDeBits;
 	std::ofstream arquivoDeSaida(nomeDoArquivo + ".o");
-	arquivoDeSaida << nomeDoArquivo << ":" << "\n";
-	arquivoDeSaida << "C:";
+	std::string códigoSaida;
+
+	if (isArquivoModulo) {
+		arquivoDeSaida << nomeDoArquivo << ":" << "\n";
+		arquivoDeSaida << "C:";
+	}
 
 	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
 		std::string label = tokensDaLinha[i].label;
@@ -638,10 +669,13 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo) {
 	showMapaDeBits(mapaDeBits);
 	arquivoDeSaida << "\n"; // Escreve um pulo de linha ao final do arquivo 
 	arquivoDeSaida.close();	// para indicarmos o início para a Tabela de Definições
-	escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
-	escreveTabelaDeUsoNoArquivoDeSaida(nomeDoArquivo + ".o");
-	escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
-	escreveMapaDeBitsNoArquivoDeSaida((nomeDoArquivo + ".o"), mapaDeBits);
+	if (isArquivoModulo) {
+		escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
+		escreveTabelaDeUsoNoArquivoDeSaida(nomeDoArquivo + ".o");
+		escreveTamanhoDoCodigoNoArquivoDeSaida((nomeDoArquivo + ".o"), tamanhoCodigo);
+		escreveMapaDeBitsNoArquivoDeSaida((nomeDoArquivo + ".o"), mapaDeBits);
+	}
+	
 }
 
 //void PreProcessamento::processarDiretivas(int numeroDeArquivos) {

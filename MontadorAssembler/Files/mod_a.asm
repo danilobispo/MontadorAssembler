@@ -1,18 +1,13 @@
 ;Co
 
-
+MOD_A: BEGIN
 IF 0
 Y: EXTERN	;có é õ á é s ç 
 
-MAT: EQU 1
+MAT: EQU 0
 
 IF MAT
 Y: EXTERN	;có é õ á é s ç 
-
-MOD_B     : 
-EXTERN  ;co
-PUBLIC VAL
-PUBLIC L1
 
 SECTION TEXT
 INPUT Y
@@ -31,3 +26,5 @@ VAL1: CONST 0x19
 
 SECTION BSS
 VAL: SPACE
+
+END
