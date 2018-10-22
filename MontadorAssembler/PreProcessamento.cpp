@@ -152,6 +152,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	int contadorPosicao = 0;
 	bool isSectionText = false;
 	bool isSectionData = false;
+	bool isSectionBss = false;
 	bool checaBeginEEnd = numeroDeArquivos == 2 ? true : false;
 	bool temBegin = false;
 	bool temEnd = false;
@@ -205,11 +206,22 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 				}
 				else if (operando[0] == "data") {
 					if (!isSectionText) {
-						ErrorLib errorLib(contadorLinha, "Section data declarada antes da seção text!", "Léxico");
+						ErrorLib errorLib(contadorLinha, "Section data declarada antes da seção text!", "Semantico");
 					}
 					else {
 						isSectionText = false;
+						isSectionBss = false;
 						isSectionData = true;
+					}
+				}
+				else if (operando[0] == "bss") {
+					if (!isSectionText) {
+						ErrorLib errorLib(contadorLinha, "Section bss declarada antes da seção text!", "Semantico");
+					}
+					else {
+						isSectionText = false;
+						isSectionData = false;
+						isSectionBss = true;
 					}
 				}
 			}
@@ -225,7 +237,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 						ErrorLib errorLib(contadorLinha, "Operando incorreto para instrução SPACE", "Sintático");
 					}
 				}
-				else { ErrorLib errorLib(contadorLinha, "Instrução fora da section correta", "Léxico"); }
+				else { ErrorLib errorLib(contadorLinha, "Instrução fora da section correta", "Semantico"); }
 			}
 			if (operacao == "const") {
 				if (isSectionData) {
