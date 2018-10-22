@@ -1,5 +1,6 @@
 ;Co
 
+MOD_A: BEGIN
 IF 0
 Y: EXTERN	;có é õ á é s ç 
 
@@ -26,3 +27,4 @@ VAL1: CONST 0x19
 SECTION BSS
 VAL: SPACE
 
+END
