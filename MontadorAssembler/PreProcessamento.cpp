@@ -15,37 +15,47 @@ PreProcessamento::PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDa
 	tokensDaLinhaList) {
 
 	bool entrouEmText = false;
-	for (auto &tokensDaLinha : tokensDaLinhaList) {
-		if (tokensDaLinha.operacao == "section" && tokensDaLinha.operando[0] == "text") {
+	for (int i = 0; i < tokensDaLinhaList.size(); i++) {
+		if (tokensDaLinhaList[i].operacao == "section" && tokensDaLinhaList[i].operando[0] == "text") {
 			entrouEmText = true;
 		}
-		if (tokensDaLinha.operacao == "equ") {
+		if (tokensDaLinhaList[i].operacao == "equ") {
 			if (!entrouEmText) {
 				TabelaLib tabelaLib;
-				
-				if (!tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(tokensDaLinha.label)) {
-					tabelaLib.insereSimboloNaTabelaDeSimbolos(tokensDaLinha.label, 
-						InfoDeSimbolo(-1, -1, true, converteStringParaInt(tokensDaLinha.operando[0]), false));
+
+				if (!tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(tokensDaLinhaList[i].label)) {
+					tabelaLib.insereSimboloNaTabelaDeSimbolos(
+						tokensDaLinhaList[i].label,
+						InfoDeSimbolo(
+							converteStringParaInt(tokensDaLinhaList[i].operando[0]),
+							converteStringParaInt(tokensDaLinhaList[i].operando[0]),
+							true,
+							converteStringParaInt(tokensDaLinhaList[i].operando[0]), 
+							false));
 				}
 				else {
-					ErrorLib erro(0, "Simbolo \""+ tokensDaLinha.label +"\" ja definido", "Semântico"); //TODO colocar a linha correta
+					ErrorLib erro(tokensDaLinhaList[i].numeroDaLinha, "Simbolo \"" + tokensDaLinhaList[i].label + "\" ja definido", "Semântico");
 				}
+				tokensDaLinhaList.erase(tokensDaLinhaList.begin() + i);
+				i = 0;
+				
 			}
 			else {
-				ErrorLib erro(0, "A diretiva EQU deve ser definida antes de SECTION TEXT", "Semântico");//TODO colocar a linha correta
+				ErrorLib erro(tokensDaLinhaList[i].numeroDaLinha, "A diretiva EQU deve ser definida antes de SECTION TEXT", "Semântico");
 			}
 		}
 	}
 
 
-
-	for (int i = 0; i < tokensDaLinhaList.size(); i++) {
+	showTabelaDeSimbolos();
+	int i = 0;
+	while(i < tokensDaLinhaList.size()) {
 		if (tokensDaLinhaList[i].operacao == "if") {
+			std::string::size_type tamanhoTokenList = tokensDaLinhaList.size();
 			TabelaLib tabelaLib;
 			bool ehSimbolo = tabelaLib.rotuloJaExistenteNaTabelaDeSimbolos(tokensDaLinhaList[i].operando[0]);
 			bool apagaProximaLinha = false;
 			if (ehSimbolo) {
-				//InfoDeSimbolo(-1, -1, true, converteStringParaInt(tokensDaLinha.operando[0]), false);
 				InfoDeSimbolo infoDeSimbolo = tabelaLib.obtemSimboloNaTabelaDeSimbolos(tokensDaLinhaList[i].operando[0]);
 				if (infoDeSimbolo.valorConstante != 0) {
 					apagaProximaLinha = false;
@@ -55,26 +65,40 @@ PreProcessamento::PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDa
 				}
 			}
 			else if (isOperandoNumero(tokensDaLinhaList[i].operando[0])) {
-				std::string::size_type tamanhoTokenList = tokensDaLinhaList.size();
-				if (i == tamanhoTokenList) { //Nada a ser feito, tamanho da lista é igual ao indice(ultima linha)
-					apagaProximaLinha = false;
+				if (converteStringParaInt(tokensDaLinhaList[i].operando[0]) == 0) {
+					apagaProximaLinha = true;
 				}
 				else {
-					apagaProximaLinha = true;
-				}				
+					apagaProximaLinha = false;
+				}
+			}
+			else {
+				ErrorLib errorLib = ErrorLib(tokensDaLinhaList[i].numeroDaLinha, "Operando invalido para IF", "Sintatico");
+			}
+			if (i == tamanhoTokenList) { //Nada a ser feito, tamanho da lista é igual ao indice(ultima linha)
+				apagaProximaLinha = false;
 			}
 			if (apagaProximaLinha) {
-				tokensDaLinhaList.erase(tokensDaLinhaList.begin() + i);
+				tokensDaLinhaList.erase(tokensDaLinhaList.begin() + i, tokensDaLinhaList.begin() + (i + 2));
+				i = 0; // Volta para a posição 0 pois as posições mudaram, então é possível que um if tenha aparecido antes
+			}
+			else {
+				tokensDaLinhaList.erase(tokensDaLinhaList.begin() + i); // Apaga o if atual, já que já foi avaliado
+				i++;
 			}
 		}
+		else {
+			i++;
+		}
 	}
+	setTokensDaLinhaList(tokensDaLinhaList);
 }
 
-const std::vector<Montador::TokensDaLinha> &PreProcessamento::getTokensDaLinhaList() const {
+std::vector<Montador::TokensDaLinha> PreProcessamento::getTokensDaLinhaList() {
 	return tokensDaLinhaList;
 }
 
-void PreProcessamento::setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> &tokensDaLinhaList) {
+void PreProcessamento::setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> tokensDaLinhaList) {
 	PreProcessamento::tokensDaLinhaList = tokensDaLinhaList;
 }
 
@@ -146,7 +170,7 @@ void PreProcessamento::montarCodigo(std::string nomeArquivoSaida) {
 	primeiraPassagem(tokensDaLinha, 2);
 }
 
-void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinhaList, int numeroDeArquivos) {
+void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha, int numeroDeArquivos) {
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
@@ -157,6 +181,7 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 	bool temBegin = false;
 	bool temEnd = false;
 
+	tokensDaLinhaList = getTokensDaLinhaList();
 
 	for (unsigned int i = 0; i < tokensDaLinhaList.size(); i++) {
 		std::string label = tokensDaLinhaList[i].label;
@@ -209,7 +234,6 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 						ErrorLib errorLib(contadorLinha, "Section data declarada antes da seção text!", "Semantico");
 					}
 					else {
-						isSectionText = false;
 						isSectionBss = false;
 						isSectionData = true;
 					}
@@ -219,14 +243,13 @@ void PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tok
 						ErrorLib errorLib(contadorLinha, "Section bss declarada antes da seção text!", "Semantico");
 					}
 					else {
-						isSectionText = false;
 						isSectionData = false;
 						isSectionBss = true;
 					}
 				}
 			}
 			if (operacao == "space") {
-				if (isSectionData) {
+				if (isSectionBss) {
 					if (isOperandoNumero(operando[0])) {
 						int numeroOperando = converteStringParaInt(operando[0]);
 						tabelaLib.insereSimboloNaTabelaDeSimbolos(

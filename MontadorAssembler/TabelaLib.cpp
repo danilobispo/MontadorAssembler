@@ -69,7 +69,8 @@ bool TabelaLib::isInstrucao(std::string operacao) {
 	}
 	return false;
 }
-InfoDeSimbolo::InfoDeSimbolo(int endereco, int espaco, bool isConstante, int valorConstante, bool isExtern) : endereco(endereco),
+InfoDeSimbolo::InfoDeSimbolo(int endereco, int espaco, bool isConstante, int valorConstante, bool isExtern) : 
+endereco(endereco),
 espaco(espaco),
 isConstante(isConstante),
 valorConstante(valorConstante),

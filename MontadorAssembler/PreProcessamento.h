@@ -16,9 +16,9 @@ public:
 	void gerarCodigoDeSaidaMacros(std::string nomeArquivoSaida);
 	void gerarCodigoDeSaida(std::string nomeArquivoSaida);
 
-	const std::vector<Montador::TokensDaLinha> &getTokensDaLinhaList() const;
+	std::vector<Montador::TokensDaLinha> getTokensDaLinhaList();
 
-	void setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> &tokensDaLinhaList);
+	void setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> tokensDaLinhaList);
 
 	std::vector<Montador::TokensDaLinha>
 		redefineVariaveisDeMacro(std::string nomeMacro,

@@ -4,7 +4,10 @@
 IF 0
 Y: EXTERN	;có é õ á é s ç 
 
-MAT: EQU 0
+MAT: EQU 1
+
+IF MAT
+Y: EXTERN	;có é õ á é s ç 
 
 MOD_B     : 
 EXTERN  ;co
@@ -24,4 +27,7 @@ L1: STOP
 L3: COPY Aaaa, Beeech
 
 SECTION DATA
-VAL: CONST 0x19
+VAL1: CONST 0x19
+
+SECTION BSS
+VAL: SPACE

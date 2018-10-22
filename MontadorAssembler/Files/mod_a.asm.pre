@@ -1,0 +1,16 @@
+y: extern 
+mod_b: extern 
+public val
+public l1
+section text
+input y
+rot2: load val
+add y
+store y+2
+jmpp mod_b
+l1: stop 
+l3: copy aaaa,beeech
+section data
+val1: const 25
+section bss
+val: space 1
