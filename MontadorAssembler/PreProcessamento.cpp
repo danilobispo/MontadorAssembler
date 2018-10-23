@@ -678,10 +678,11 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 			}
 		}
 	}
-	showTabelaDeUso();
-	showMapaDeBits(mapaDeBits);
+	
 	arquivoDeSaida.close();
 	if (isArquivoModulo) {
+		showTabelaDeUso();
+		showMapaDeBits(mapaDeBits);
 		showTabelaDeUso();
 		showMapaDeBits(mapaDeBits);
 		escreveTabelaDeDefinicoesNoArquivoDeSaida(nomeDoArquivo + ".o");
