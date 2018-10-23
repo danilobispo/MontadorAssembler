@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="MontadorAssembler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ParseLib.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Montador.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TabelaLib.cpp">
@@ -33,12 +27,15 @@
     <ClCompile Include="ErrorLib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Tokenizador.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Montador.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ParseLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Montador.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TabelaLib.h">
@@ -53,7 +50,10 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MontadorAssembler.h">
+    <ClInclude Include="Tokenizador.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Montador.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

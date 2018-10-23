@@ -151,16 +151,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ErrorLib.cpp" />
+    <ClCompile Include="Tokenizador.cpp" />
     <ClCompile Include="Montador.cpp" />
-    <ClCompile Include="MontadorAssembler.cpp" />
     <ClCompile Include="ParseLib.cpp" />
     <ClCompile Include="PreProcessamento.cpp" />
     <ClCompile Include="TabelaLib.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ErrorLib.h" />
+    <ClInclude Include="Tokenizador.h" />
     <ClInclude Include="Montador.h" />
-    <ClInclude Include="MontadorAssembler.h" />
     <ClInclude Include="ParseLib.h" />
     <ClInclude Include="PreProcessamento.h" />
     <ClInclude Include="resource.h" />

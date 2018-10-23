@@ -1,6 +1,6 @@
 #include "PreProcessamento.h"
 #include <algorithm>
-#include "Montador.h"
+#include "Tokenizador.h"
 #include "ParseLib.h"
 #include "TabelaLib.h"
 #include "ErrorLib.h"
@@ -11,7 +11,7 @@
 #include <sstream>
 #include <cctype>
 
-PreProcessamento::PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDaLinhaList) : tokensDaLinhaList(
+PreProcessamento::PreProcessamento(std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaList) : tokensDaLinhaList(
 	tokensDaLinhaList) {
 
 	bool entrouEmText = false;
@@ -94,11 +94,11 @@ PreProcessamento::PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDa
 	setTokensDaLinhaList(tokensDaLinhaList);
 }
 
-std::vector<Montador::TokensDaLinha> PreProcessamento::getTokensDaLinhaList() {
+std::vector<Tokenizador::TokensDaLinha> PreProcessamento::getTokensDaLinhaList() {
 	return tokensDaLinhaList;
 }
 
-void PreProcessamento::setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> tokensDaLinhaList) {
+void PreProcessamento::setTokensDaLinhaList(const std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaList) {
 	PreProcessamento::tokensDaLinhaList = tokensDaLinhaList;
 }
 
@@ -111,7 +111,7 @@ void PreProcessamento::gerarCodigoDeSaidaMacros(std::string nomeArquivoSaida) {
 }
 
 void PreProcessamento::gerarCodigoDeSaida(std::string nomeArquivoSaida) {
-	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
+	std::vector<Tokenizador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 	std::ofstream arquivoSaida(nomeArquivoSaida);
 	for (const auto &e : tokensDaLinha) {
 		if (e.label != "") {
@@ -141,9 +141,9 @@ void PreProcessamento::gerarCodigoDeSaida(std::string nomeArquivoSaida) {
 	arquivoSaida.close();
 }
 
-std::vector<Montador::TokensDaLinha> PreProcessamento::redefineVariaveisDeMacro(
+std::vector<Tokenizador::TokensDaLinha> PreProcessamento::redefineVariaveisDeMacro(
 	std::string nomeMacro,
-	std::vector<Montador::TokensDaLinha> macroLinhas,
+	std::vector<Tokenizador::TokensDaLinha> macroLinhas,
 	std::vector<std::string> listaDeOperandosMacro,
 	TabelaLib tabelaLib) {
 	std::map<std::string, std::string> variaveis;
@@ -166,11 +166,11 @@ std::vector<Montador::TokensDaLinha> PreProcessamento::redefineVariaveisDeMacro(
 * Aqui realizamos a montagem do código, que vai sofrer uma análise léxica
 */
 void PreProcessamento::montarCodigo(std::string nomeArquivoSaida) {
-	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
+	std::vector<Tokenizador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 	primeiraPassagem(tokensDaLinha);
 }
 
-bool PreProcessamento::primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha) {
+bool PreProcessamento::primeiraPassagem(std::vector<Tokenizador::TokensDaLinha> tokensDaLinha) {
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
@@ -496,7 +496,7 @@ void PreProcessamento::showMapaDeBits(std::vector<int> vetor)
 
 
 void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivoModulo) {
-	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
+	std::vector<Tokenizador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 	TabelaLib tabelaLib;
 	int contadorLinha = 1;
 	int contadorPosicao = 0;
@@ -694,10 +694,10 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 }
 
 //void PreProcessamento::processarDiretivas(int numeroDeArquivos) {
-//	std::vector<Montador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
+//	std::vector<Tokenizador::TokensDaLinha> tokensDaLinha = getTokensDaLinhaList();
 //	// Cópia das linhas tokenizadas do código, como se o if for falso a linha seguinte não será processada,
 //	// ela será removida da saída
-//	std::vector<Montador::TokensDaLinha> tokensDaLinhaSaida = getTokensDaLinhaList();
+//	std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaSaida = getTokensDaLinhaList();
 //
 //	bool isSectionText = false;
 //	bool isSectionData = false;
@@ -716,7 +716,7 @@ void PreProcessamento::segundaPassagem(std::string nomeDoArquivo, bool isArquivo
 //	int fatorDeCorrecao = 0;
 //
 //	for (unsigned int i = 0; i < tokensDaLinha.size(); i++) {
-//		Montador::TokensDaLinha copiaLinha = tokensDaLinha[i];
+//		Tokenizador::TokensDaLinha copiaLinha = tokensDaLinha[i];
 //		// TODO: Devemos avaliar 2 novas diretivas nessa etapa do trabalho: BEGIN e END
 //		if (tokensDaLinha[i].operacao == "begin") {
 //			// Se temos um begin, o label indica o nome do módulo, logo iremos adiciona-lo na tabela de símbolos

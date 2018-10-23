@@ -4,7 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <map>
-#include "Montador.h"
+#include "Tokenizador.h"
 
 // Para essa classe precisamos definir 2 tabelas estáticas e uma dinâmica:
 // 1. Tabela de Diretivas
@@ -80,9 +80,9 @@ struct InfoDeSimbolo {
 };
 struct InfoMacroDef {
 	int linha;
-	std::vector<Montador::TokensDaLinha> tokensDaLinha;
+	std::vector<Tokenizador::TokensDaLinha> tokensDaLinha;
 
-	InfoMacroDef(int linha, const std::vector<Montador::TokensDaLinha> &tokensDaLinha);
+	InfoMacroDef(int linha, const std::vector<Tokenizador::TokensDaLinha> &tokensDaLinha);
 };
 
 struct InfoMacroName {

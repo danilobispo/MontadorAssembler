@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Montador.h"
+#include "Tokenizador.h"
 
 
 class ParseLib
@@ -29,7 +29,7 @@ public:
 	std::string parseOperacao(std::string linha, bool hasLabel);
 	std::vector<std::string> parseOperando(std::string linha, int numeroDeOperandos, bool hasLabel);
 
-	Montador::TokensDaLinha parseLinha(std::string linha, int linhaContador);
+	Tokenizador::TokensDaLinha parseLinha(std::string linha, int linhaContador);
 
 	const std::vector<std::string> &getLinhasDoCodigo() const;
 
@@ -60,7 +60,7 @@ public:
 
 	bool is_number(const std::string& s);
 
-	std::vector<Montador::TokensDaLinha> parseTokens(std::string arquivoEntradaNome);
+	std::vector<Tokenizador::TokensDaLinha> parseTokens(std::string arquivoEntradaNome);
 
 	int getContadorPosicao() const;
 

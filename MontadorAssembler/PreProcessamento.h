@@ -1,35 +1,35 @@
 #pragma once
 #include <fstream>
-#include "Montador.h"
+#include "Tokenizador.h"
 #include "TabelaLib.h"
 #include <unordered_map>
 
 class PreProcessamento {
 public:
-	PreProcessamento(std::vector<Montador::TokensDaLinha> tokensDaLinhaList);
+	PreProcessamento(std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaList);
 
 private:
-	std::vector<Montador::TokensDaLinha> tokensDaLinhaList;
+	std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaList;
 public:
 	
 	void gerarCodigoDeSaidaDiretivas(std::string nomeArquivoSaida);
 	void gerarCodigoDeSaidaMacros(std::string nomeArquivoSaida);
 	void gerarCodigoDeSaida(std::string nomeArquivoSaida);
 
-	std::vector<Montador::TokensDaLinha> getTokensDaLinhaList();
+	std::vector<Tokenizador::TokensDaLinha> getTokensDaLinhaList();
 
-	void setTokensDaLinhaList(const std::vector<Montador::TokensDaLinha> tokensDaLinhaList);
+	void setTokensDaLinhaList(const std::vector<Tokenizador::TokensDaLinha> tokensDaLinhaList);
 
-	std::vector<Montador::TokensDaLinha>
+	std::vector<Tokenizador::TokensDaLinha>
 		redefineVariaveisDeMacro(std::string nomeMacro,
-			std::vector<Montador::TokensDaLinha> macroLinhas,
+			std::vector<Tokenizador::TokensDaLinha> macroLinhas,
 			std::vector<std::string> listaDeOperandosMacro, TabelaLib tabelaLib);
 
 
 
 	// TODO: Se der tempo, mover isso para montador
 	void montarCodigo();
-	bool primeiraPassagem(std::vector<Montador::TokensDaLinha> tokensDaLinha);
+	bool primeiraPassagem(std::vector<Tokenizador::TokensDaLinha> tokensDaLinha);
 	void segundaPassagem(std::string nomeArquivoSaida, bool isArquivoModulo);
 	void showTabelaDeSimbolos();
 	void showTabelaDeDefinicoes();

@@ -5,7 +5,7 @@
 #include <sstream>
 #include "TabelaLib.h"
 #include "ErrorLib.h"
-#include "Montador.h"
+#include "Tokenizador.h"
 #include "PreProcessamento.h"
 
 
@@ -200,7 +200,7 @@ std::string ParseLib::removeComentarios(std::string arquivoConteudo) {
 // Linhas com um token(END, STOP)
 // Linhas com 3 tokens(COPY command ou LABEL + Operação)
 // Linhas com 4 tokens(LABEL+COPY)
-Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContador) {
+Tokenizador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContador) {
 	TabelaLib tabelaLib;
 	// Transforma em lowercase
 	std::transform(linha.begin(), linha.end(), linha.begin(), ::tolower);
@@ -254,7 +254,7 @@ Montador::TokensDaLinha ParseLib::parseLinha(std::string linha, int linhaContado
 	else {
 		ErrorLib errorLib(linhaContador, "Operação inexistente", "Léxico");
 	}
-	return Montador::TokensDaLinha(label, operacao, operandos, linhaContador);
+	return Tokenizador::TokensDaLinha(label, operacao, operandos, linhaContador);
 }
 
 
@@ -369,9 +369,9 @@ void ParseLib::preparaCodigo(std::string operacao, const std::string &arquivoEnt
 	std::vector<std::string> codeLines = getLinhasDoCodigo();
 	int contadorLinha = 1;
 	setContadorLinha(contadorLinha);
-	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
+	std::vector<Tokenizador::TokensDaLinha> listTokensDaLinha;
 	for (auto &codeLine : codeLines) {
-		Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
+		Tokenizador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
 		listTokensDaLinha.push_back(tokensDaLinha);
 		contadorLinha++;
 	}
@@ -469,7 +469,7 @@ bool ParseLib::is_number(const std::string &s) {
 	return false;
 }
 
-std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoConteudo) {
+std::vector<Tokenizador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoConteudo) {
 	arquivoConteudo = removeComentarios(arquivoConteudo);
 	arquivoConteudo = removeTabulacoes(arquivoConteudo);
 	arquivoConteudo = removeEspacosEmBrancoExtras(arquivoConteudo);
@@ -504,12 +504,12 @@ std::vector<Montador::TokensDaLinha> ParseLib::parseTokens(std::string arquivoCo
 		}*/
 	//}
 	int contadorLinha = 1;
-	std::vector<Montador::TokensDaLinha> listTokensDaLinha;
+	std::vector<Tokenizador::TokensDaLinha> listTokensDaLinha;
 	int contadorPosicao = 0;
 	setContadorPosicao(contadorPosicao);
 	codeLines.erase(remove(codeLines.begin(), codeLines.end(), ""), codeLines.end());
 	for (auto &codeLine : codeLines) {
-			Montador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
+			Tokenizador::TokensDaLinha tokensDaLinha = parseLinha(codeLine, contadorLinha);
 			listTokensDaLinha.push_back(tokensDaLinha);
 			contadorLinha++;
 	}
